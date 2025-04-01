@@ -1,0 +1,112 @@
+[gd_scene load_steps=2 format=3 uid="uid://bv5w8b3u03t4y"]
+
+[ext_resource type="Texture2D" uid="uid://bnx2a60lkox0x" path="res://Img/Background.png" id="1_xku86"]
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="BackgroundImage" type="TextureRect" parent="."]
+custom_minimum_size = Vector2(1920, 1080)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 1.0
+offset_top = 6.0
+offset_right = 1919.0
+offset_bottom = 1084.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_xku86")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+
+[node name="EditContainer" type="VBoxContainer" parent="HBoxContainer"]
+custom_minimum_size = Vector2(960, 0)
+layout_mode = 2
+
+[node name="MarginContainer2" type="MarginContainer" parent="HBoxContainer/EditContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 500
+theme_override_constants/margin_top = 20
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/EditContainer/MarginContainer2"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Run" type="Button" parent="HBoxContainer/EditContainer/MarginContainer2/HBoxContainer"]
+layout_mode = 2
+text = "Run"
+
+[node name="Load" type="Button" parent="HBoxContainer/EditContainer/MarginContainer2/HBoxContainer"]
+layout_mode = 2
+text = "Load"
+
+[node name="Save" type="Button" parent="HBoxContainer/EditContainer/MarginContainer2/HBoxContainer"]
+layout_mode = 2
+text = "Save"
+
+[node name="SpinBox" type="SpinBox" parent="HBoxContainer/EditContainer/MarginContainer2/HBoxContainer"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/EditContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 20
+
+[node name="CodeEdit" type="CodeEdit" parent="HBoxContainer/EditContainer/MarginContainer"]
+custom_minimum_size = Vector2(0, 900)
+layout_mode = 2
+text = "Spawn(0, 0)
+Color(Black)
+n <- 5
+k <- 3 + 3 * 10
+n <- k * 2
+actual-x <- GetActualX()
+i <- 0
+
+loop-1
+DrawLine(1, 0, 1)
+i <- i + 1
+is-brush-color-blue <- IsBrushColor(\"Blue\")
+Goto [loop-ends-here] (is-brush-color-blue == 1)
+GoTo [loop1] (i < 10)
+
+Color(\"Blue\")
+GoTo [loop1] (1 == 1)
+
+loop-ends-here"
+gutters_draw_breakpoints_gutter = true
+gutters_draw_bookmarks = true
+gutters_draw_executing_lines = true
+gutters_draw_line_numbers = true
+gutters_zero_pad_line_numbers = true
+gutters_draw_fold_gutter = true
+code_completion_enabled = true
+
+[node name="DisplayContainer" type="Control" parent="HBoxContainer"]
+custom_minimum_size = Vector2(960, 0)
+layout_mode = 2
+
+[node name="CanvasContainer" type="Control" parent="HBoxContainer/DisplayContainer"]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer/DisplayContainer/CanvasContainer"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="GridOverlay" type="Control" parent="HBoxContainer/DisplayContainer/CanvasContainer"]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="FileDialog" type="FileDialog" parent="HBoxContainer/DisplayContainer"]
