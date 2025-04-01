@@ -1,10 +1,15 @@
-[gd_scene load_steps=2 format=3 uid="uid://bv5w8b3u03t4y"]
+[gd_scene load_steps=5 format=3 uid="uid://bv5w8b3u03t4y"]
 
+[ext_resource type="Script" path="res://scripts/Main.cs" id="1_l8jyc"]
 [ext_resource type="Texture2D" uid="uid://bnx2a60lkox0x" path="res://Img/Background.png" id="1_xku86"]
+[ext_resource type="Script" path="res://scripts/GridOverlay.cs" id="3_6gu13"]
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_3px2y"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
 anchors_preset = 0
+script = ExtResource("1_l8jyc")
 
 [node name="BackgroundImage" type="TextureRect" parent="."]
 custom_minimum_size = Vector2(1920, 1080)
@@ -12,10 +17,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 1.0
-offset_top = 6.0
-offset_right = 1919.0
-offset_bottom = 1084.0
+offset_right = 1920.0
+offset_bottom = 1080.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("1_xku86")
@@ -34,24 +37,27 @@ layout_mode = 2
 theme_override_constants/margin_left = 500
 theme_override_constants/margin_top = 20
 
-[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/EditContainer/MarginContainer2"]
+[node name="ButtonContainer" type="HBoxContainer" parent="HBoxContainer/EditContainer/MarginContainer2"]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="Run" type="Button" parent="HBoxContainer/EditContainer/MarginContainer2/HBoxContainer"]
+[node name="Run" type="Button" parent="HBoxContainer/EditContainer/MarginContainer2/ButtonContainer"]
 layout_mode = 2
 text = "Run"
 
-[node name="Load" type="Button" parent="HBoxContainer/EditContainer/MarginContainer2/HBoxContainer"]
+[node name="Load" type="Button" parent="HBoxContainer/EditContainer/MarginContainer2/ButtonContainer"]
 layout_mode = 2
 text = "Load"
 
-[node name="Save" type="Button" parent="HBoxContainer/EditContainer/MarginContainer2/HBoxContainer"]
+[node name="Save" type="Button" parent="HBoxContainer/EditContainer/MarginContainer2/ButtonContainer"]
 layout_mode = 2
 text = "Save"
 
-[node name="SpinBox" type="SpinBox" parent="HBoxContainer/EditContainer/MarginContainer2/HBoxContainer"]
+[node name="SpinBox" type="SpinBox" parent="HBoxContainer/EditContainer/MarginContainer2/ButtonContainer"]
 layout_mode = 2
+min_value = 2.0
+max_value = 256.0
+value = 2.0
 
 [node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/EditContainer"]
 layout_mode = 2
@@ -61,7 +67,7 @@ theme_override_constants/margin_right = 50
 theme_override_constants/margin_bottom = 20
 
 [node name="CodeEdit" type="CodeEdit" parent="HBoxContainer/EditContainer/MarginContainer"]
-custom_minimum_size = Vector2(0, 900)
+custom_minimum_size = Vector2(900, 900)
 layout_mode = 2
 text = "Spawn(0, 0)
 Color(Black)
@@ -91,22 +97,34 @@ gutters_draw_fold_gutter = true
 code_completion_enabled = true
 
 [node name="DisplayContainer" type="Control" parent="HBoxContainer"]
-custom_minimum_size = Vector2(960, 0)
+custom_minimum_size = Vector2(880, 0)
 layout_mode = 2
 
 [node name="CanvasContainer" type="Control" parent="HBoxContainer/DisplayContainer"]
+custom_minimum_size = Vector2(960, 1080)
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="TextureRect" type="TextureRect" parent="HBoxContainer/DisplayContainer/CanvasContainer"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+custom_minimum_size = Vector2(900, 900)
+layout_mode = 2
+offset_left = -30.0
+offset_top = 55.5
+offset_right = 870.0
+offset_bottom = 955.5
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("CanvasTexture_3px2y")
 
 [node name="GridOverlay" type="Control" parent="HBoxContainer/DisplayContainer/CanvasContainer"]
+custom_minimum_size = Vector2(900, 900)
 anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = -30.0
+offset_top = 56.0
+offset_right = 850.0
+offset_bottom = 936.0
+script = ExtResource("3_6gu13")
 
 [node name="FileDialog" type="FileDialog" parent="HBoxContainer/DisplayContainer"]
+size = Vector2i(303, 180)
