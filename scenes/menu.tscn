@@ -1,0 +1,80 @@
+[gd_scene load_steps=14 format=3 uid="uid://c6bst0c0anhv5"]
+
+[ext_resource type="Texture2D" uid="uid://dxyn0xbrxtow2" path="res://Img/wall-e.png" id="1_gc3pd"]
+[ext_resource type="Texture2D" uid="uid://ba5ovtbqtbq5e" path="res://Img/Letrero.png" id="2_8bsrc"]
+[ext_resource type="Script" path="res://scripts/Salir.cs" id="6_5em4c"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_13oan"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_bgnjx"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_vx165"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_lpxn0"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_8fotv"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_2fqwf"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_cirpl"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_12wnh"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_yb18c"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_hvhho"]
+
+[node name="Menu" type="Node"]
+
+[node name="TextureRect" type="TextureRect" parent="."]
+offset_right = 1920.0
+offset_bottom = 1080.0
+texture = ExtResource("1_gc3pd")
+
+[node name="TextureRect2" type="TextureRect" parent="."]
+offset_left = 1248.0
+offset_top = -2.0
+offset_right = 1948.0
+offset_bottom = 498.0
+texture = ExtResource("2_8bsrc")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -434.0
+offset_top = -501.0
+offset_right = -134.0
+offset_bottom = -89.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/separation = 20
+
+[node name="Comenzar" type="Button" parent="VBoxContainer"]
+custom_minimum_size = Vector2(250, 75)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_13oan")
+
+[node name="Documentacion" type="Button" parent="VBoxContainer"]
+custom_minimum_size = Vector2(250, 75)
+layout_mode = 2
+theme_override_styles/hover = SubResource("StyleBoxTexture_bgnjx")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_vx165")
+theme_override_styles/normal = SubResource("StyleBoxTexture_lpxn0")
+
+[node name="Creditos" type="Button" parent="VBoxContainer"]
+custom_minimum_size = Vector2(250, 75)
+layout_mode = 2
+theme_override_styles/hover = SubResource("StyleBoxTexture_8fotv")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_2fqwf")
+theme_override_styles/normal = SubResource("StyleBoxTexture_cirpl")
+
+[node name="Salir" type="Button" parent="VBoxContainer"]
+custom_minimum_size = Vector2(250, 75)
+layout_mode = 2
+theme_override_styles/hover = SubResource("StyleBoxTexture_12wnh")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_yb18c")
+theme_override_styles/normal = SubResource("StyleBoxTexture_hvhho")
+script = ExtResource("6_5em4c")

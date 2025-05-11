@@ -73,12 +73,18 @@ public partial class Main : Control
     {
         GD.Print("Guardar Código");
         fileDialogSave.PopupCentered();
+        fileDialogSave.Size = new Vector2I(600, 400); // ancho x alto
+        fileDialogLoad.Size = new Vector2I(600, 400);
+
     }
 
     private void OnLoadButtonPressed()
     {
         GD.Print("Cargar Código");
         fileDialogLoad.PopupCentered();
+        fileDialogSave.Size = new Vector2I(600, 400); // ancho x alto
+        fileDialogLoad.Size = new Vector2I(600, 400);
+
     }
 
     private void OnRunButtonPressed()

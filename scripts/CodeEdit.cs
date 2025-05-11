@@ -7,8 +7,7 @@ public partial class CodeEdit : Godot.CodeEdit
     {
         // Configurar los colores básicos del editor para simular Dark+ de VS Code:
         // Fondo: #1e1e1e, Fuente: #d4d4d4
-        AddThemeColorOverride("background_color", new Color(0.1176f, 0.1176f, 0.1176f)); // #1e1e1e
-        AddThemeColorOverride("font_color", new Color(0.831f, 0.831f, 0.831f)); // #d4d4d4
+        AddThemeColorOverride("font_color", Colors.White);
 
         // Opcionales: colores para caret y selección
         AddThemeColorOverride("caret_color", Colors.White);

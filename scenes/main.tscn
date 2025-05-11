@@ -1,9 +1,15 @@
-[gd_scene load_steps=6 format=3 uid="uid://bv5w8b3u03t4y"]
+[gd_scene load_steps=7 format=3 uid="uid://bv5w8b3u03t4y"]
 
 [ext_resource type="Script" path="res://scripts/Main.cs" id="1_l8jyc"]
-[ext_resource type="Texture2D" uid="uid://bnx2a60lkox0x" path="res://Img/Background.png" id="1_xku86"]
 [ext_resource type="Script" path="res://scripts/GridOverlay.cs" id="3_6gu13"]
 [ext_resource type="Script" path="res://scripts/CodeEdit.cs" id="3_qhjx5"]
+
+[sub_resource type="Gradient" id="Gradient_dce2j"]
+offsets = PackedFloat32Array(0.103896, 1)
+colors = PackedColorArray(0.0431373, 0.247059, 0.403922, 1, 0.0471976, 0.0631616, 0.0766962, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_6ueyk"]
+gradient = SubResource("Gradient_dce2j")
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_3px2y"]
 
@@ -22,7 +28,7 @@ offset_right = 1920.0
 offset_bottom = 1080.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("1_xku86")
+texture = SubResource("GradientTexture2D_6ueyk")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 0
@@ -89,6 +95,7 @@ Color(\"Blue\")
 GoTo [loop1] (1 == 1)
 
 loop-ends-here"
+minimap_draw = true
 gutters_draw_breakpoints_gutter = true
 gutters_draw_bookmarks = true
 gutters_draw_executing_lines = true
@@ -130,4 +137,4 @@ script = ExtResource("3_6gu13")
 
 [node name="FileDialog" type="FileDialog" parent="HBoxContainer/DisplayContainer"]
 position = Vector2i(0, 36)
-size = Vector2i(303, 180)
+size = Vector2i(400, 400)
