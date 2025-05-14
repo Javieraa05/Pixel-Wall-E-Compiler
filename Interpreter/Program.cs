@@ -4,8 +4,9 @@ class Program
 {
     static void Main(string[] args)
     {
-        ProbarAST();
-
+        //ProbarLexer();
+        //ProbarAST();
+        ProbarParser();
     }
 
     static void ProbarLexer()
@@ -47,8 +48,8 @@ class Program
         var prog = new ProgramNode();
         Expr expr = new Binary(
             new Grouping(
-                new Binary(new Literal(1), "+", new Literal(2))),
-            "*",
+                new Binary(new Literal(1), new Token(TokenType.Plus,"+",0,0), new Literal(2))),
+            new Token(TokenType.Star, "*", 0, 0),
             new Literal(3)
         );
         prog.Statements.Add(new ExpressionStatement(expr));
@@ -57,6 +58,27 @@ class Program
         Console.WriteLine(printer.Print(prog));
         // Salida: (program (* (group (+ 1 2)) 3))
     }
+
+    static void ProbarParser()
+    {
+        string source = @"n <- 3 + 4 * 2";
+
+        // Paso 1: Analizar léxicamente el código fuente
+        Lexer lexer = new Lexer(source);
+        List<Token> tokens = lexer.Lex();
+
+        // Paso 2: Analizar sintácticamente los tokens
+        Parser parser = new Parser(tokens);
+        Expr expression = parser.Parse();
+
+        // Paso 3: Imprimir el árbol sintáctico (AST)
+        AstPrinter printer = new AstPrinter();
+        string output = printer.Print(expression);
+
+        Console.WriteLine("Árbol de sintaxis abstracta:");
+        Console.WriteLine(output);
+    }
+
 
 
 }
