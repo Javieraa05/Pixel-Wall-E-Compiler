@@ -61,7 +61,7 @@ class Program
 
     static void ProbarParser()
     {
-        string source = @"n <- 3 + 4 * 2";
+        string source = @"n <- (3 + 4) * 2";
 
         // Paso 1: Analizar léxicamente el código fuente
         Lexer lexer = new Lexer(source);

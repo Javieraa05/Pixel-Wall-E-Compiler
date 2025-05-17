@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 
-// Parser con soporte de asignación, lógica y potencia
+
 public class Parser
 {
     private readonly List<Token> tokens;
@@ -13,12 +13,17 @@ public class Parser
         this.tokens = tokens;
     }
 
-    /// <summary>
-    /// Entrada principal: comienza con expresión de asignación.
-    /// </summary>
     public Expr Parse()
     {
-        return Expression();
+        try
+        {
+            return Expression();
+        }
+        catch (ParseError)
+        {
+            Synchronize();
+            return null;
+        }
     }
 
     private Expr Expression() => Assignment();
@@ -208,6 +213,38 @@ public class Parser
         else
             Console.Error.WriteLine($"[line {token.Line}] Error at '{token.Lexeme}': {message}");
     }
+
+    private void Synchronize()
+{
+    // Descartar el token que provocó el error
+    Advance();
+
+    while (!IsAtEnd())
+    {
+        // Si vemos el inicio de una nueva instrucción o control,
+        // consideramos que ya estamos sincronizados
+        switch (Peek().Type)
+        {
+            // Instrucciones del lenguaje
+            case TokenType.Spawn:
+            case TokenType.Color:
+            case TokenType.Size:
+            case TokenType.DrawLine:
+            case TokenType.DrawCircle:
+            case TokenType.DrawRectangle:
+            case TokenType.Fill:
+
+            // Declaración de variable
+            case TokenType.Identifier:
+
+            // Salto condicional
+            case TokenType.GoTo:
+
+                return;
+        }
+        Advance();
+    }
+}
 }
 
 // Excepción usada para errores de parseo
