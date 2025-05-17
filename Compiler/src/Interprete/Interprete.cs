@@ -1,73 +1,195 @@
+using System;
+using System.Collections.Generic;
 
-public class Interprete : IVisitor<Object>
+public class Interprete : IVisitor<object>
 {
-    public Object VisitLiteralExpr(Literal literal)
+    // Flag para código de salida
+    public static bool hadRuntimeError = false;
+
+    private readonly Environment env = new Environment();
+
+    /// <summary>
+    /// Punto de entrada del intérprete.
+    /// </summary>
+    public void Interpret(Expr expr)
+    {
+        // Reiniciar flags antes de cada ejecución
+        hadRuntimeError = false;
+
+        try
+        {
+            object result = SafeEvaluate(expr);
+            Console.WriteLine(Stringify(result));
+        }
+        catch (RuntimeError error)
+        {
+            ReportRuntimeError(error);
+        }
+    }
+
+    public object VisitIdentifier(Identifier id)
+    {
+        // Recupera el valor de la variable
+        return env.Get(id.Name.Lexeme);
+    }
+    
+     // Método que inicia la interpretación de un programa completo:
+    public object VisitProgramNode(ProgramNode program)
+    {
+        object last = null;
+        foreach (var stmt in program.Statements)
+        {
+            last = stmt.Accept(this);
+        }
+        return last;
+    }
+
+    // Ejecutar una sentencia de expresión:
+    public object VisitExpressionStatement(ExpressionStatement stmt)
+    {
+        object value = SafeEvaluate(stmt.Expression);
+        Console.WriteLine(Stringify(value));  // opcional, si quieres imprimir cada resultado
+        return value;
+    }
+
+    public object VisitAssignExpr(Assign expr)
+    {
+        // Evalúa el lado derecho
+        object value = SafeEvaluate(expr.Value);
+        // Guarda en el entorno
+        env.Assign(expr.Name.Lexeme, value);
+        return value;
+    }
+
+    public object VisitLogicalExpr(Logical expr)
+    {
+        object left = SafeEvaluate(expr.Left);
+
+        if (expr.Operator.Type == TokenType.Or)
+        {
+            // OR: si el izquierdo es "true", retorna left sin evaluar right
+            if (IsTruthy(left)) return left;
+        }
+        else
+        {
+            // AND: si el izquierdo es "false", retorna left sin evaluar right
+            if (!IsTruthy(left)) return left;
+        }
+
+        // Si no cortocircuitó, evalúa y retorna right
+        return SafeEvaluate(expr.Right);
+    }
+
+    /// <summary>
+    /// Evalúa el árbol y traduce cualquier InvalidCastException en RuntimeError.
+    /// </summary>
+    private object SafeEvaluate(Expr expr)
+    {
+        try
+        {
+            return expr.Accept(this);
+        }
+        catch (InvalidCastException)
+        {
+            Token token = ExtractToken(expr);
+            throw new RuntimeError(token, "Operación con tipos inválidos.");
+        }
+    }
+
+    private Token ExtractToken(Expr expr)
+    {
+        switch (expr)
+        {
+            case Binary b: return b.Operator;
+            case Unary u: return u.Operator;
+            case Grouping g: return ExtractToken(g.Expression);
+            case Identifier l: return l.Name;
+            default: return new Token(TokenType.None, "", 0, 0);
+        }
+    }
+
+    public object VisitLiteralExpr(Literal literal)
     {
         return literal.Value;
     }
 
-    public Object VisitGroupingExpr(Grouping grouping)
+    public object VisitGroupingExpr(Grouping grouping)
     {
-        return Evaluate(grouping.Expression);
+        return SafeEvaluate(grouping.Expression);
     }
 
-    public Object VisitUnaryExpr(Unary expr)
+    public object VisitUnaryExpr(Unary expr)
     {
-        Object right = Evaluate(expr.Right);
+        object right = SafeEvaluate(expr.Right);
 
         switch (expr.Operator.Type)
         {
             case TokenType.Plus:
-                checkedNumberOperand(expr.Operator, right);
-                return (double)right;
+                CheckNumberOperand(expr.Operator, right);
+                return (int)right;
 
             case TokenType.Minus:
-                checkedNumberOperand(expr.Operator, right);
-                return -(double)right;
-            default:
-                throw new RuntimeError(expr.Operator, $"Operador no soportado: {expr.Operator}");
+                CheckNumberOperand(expr.Operator, right);
+                return -(int)right;
 
+            default:
+                throw new RuntimeError(
+                    expr.Operator,
+                    $"Operador no soportado '{expr.Operator.Lexeme}'."
+                );
         }
     }
 
-    public Object VisitBinaryExpr(Binary expr)
+    public object VisitBinaryExpr(Binary expr)
     {
-        Object left = Evaluate(expr.Left);
-        Object right = Evaluate(expr.Right);
+        object left = SafeEvaluate(expr.Left);
+        object right = SafeEvaluate(expr.Right);
 
         switch (expr.Operator.Type)
         {
             case TokenType.Plus:
-                checkedNumberOperands(expr.Operator, left, right);
-                return (double)left + (double)right;
+                CheckNumberOperands(expr.Operator, left, right);
+                return (int)left + (int)right;
 
             case TokenType.Minus:
-                checkedNumberOperands(expr.Operator, left, right);
-                return (double)left - (double)right;
+                CheckNumberOperands(expr.Operator, left, right);
+                return (int)left - (int)right;
 
             case TokenType.Star:
-                checkedNumberOperands(expr.Operator, left, right);
-                return (double)left * (double)right;
+                CheckNumberOperands(expr.Operator, left, right);
+                return (int)left * (int)right;
+
+            case TokenType.Power:
+                CheckNumberOperands(expr.Operator, left, right);
+                return (int)Math.Pow((int)left, (int)right);
+
+            case TokenType.Modulo:
+                CheckNumberOperands(expr.Operator, left, right);
+                if ((int)right == 0)
+                    throw new RuntimeError(expr.Operator, "Módulo por cero.");
+                return (int)left % (int)right;
 
             case TokenType.Slash:
-                checkedNumberOperands(expr.Operator, left, right);
-                return (double)left / (double)right;
+                CheckNumberOperands(expr.Operator, left, right);
+                if ((int)right == 0)
+                    throw new RuntimeError(expr.Operator, "División por cero.");
+                return (int)left / (int)right;
 
             case TokenType.Greater:
-                checkedNumberOperands(expr.Operator, left, right);
-                return (double)left > (double)right;
+                CheckNumberOperands(expr.Operator, left, right);
+                return (int)left > (int)right;
 
             case TokenType.Less:
-                checkedNumberOperands(expr.Operator, left, right);
-                return (double)left < (double)right;
+                CheckNumberOperands(expr.Operator, left, right);
+                return (int)left < (int)right;
 
             case TokenType.GreaterEqual:
-                checkedNumberOperands(expr.Operator, left, right);
-                return (double)left >= (double)right;
+                CheckNumberOperands(expr.Operator, left, right);
+                return (int)left >= (int)right;
 
             case TokenType.LessEqual:
-                checkedNumberOperands(expr.Operator, left, right);
-                return (double)left <= (double)right;
+                CheckNumberOperands(expr.Operator, left, right);
+                return (int)left <= (int)right;
 
             case TokenType.EqualEqual:
                 return left.Equals(right);
@@ -79,39 +201,64 @@ public class Interprete : IVisitor<Object>
                 return (bool)left || (bool)right;
 
             default:
-                throw new RuntimeError(expr.Operator, $"Operador no soportado: {expr.Operator}");
+                throw new RuntimeError(
+                    expr.Operator,
+                    $"Operador no soportado '{expr.Operator.Lexeme}'."
+                );
         }
     }
 
-    private void checkedNumberOperand(Token operatorToken, Object operand)
+    private void CheckNumberOperand(Token operatorToken, object operand)
     {
-        if (!(operand is double))
+        if (!(operand is int))
+            throw new RuntimeError(operatorToken, "El operando debe ser un número.");
+    }
+
+    private void CheckNumberOperands(Token operatorToken, object left, object right)
+    {
+        if (!(left is int) || !(right is int))
+            throw new RuntimeError(operatorToken, "Ambos operandos deben ser números.");
+    }
+
+    private string Stringify(object obj)
+    {
+        return obj == null ? "null" : obj.ToString();
+    }
+
+
+    private void ReportRuntimeError(RuntimeError error)
+    {
+        Console.Error.WriteLine($"{error.Message}\n[línea {error.Token.Line}]");
+        foreach (var t in error.CallStack)
         {
-            throw new RuntimeError(operatorToken, "Operador tiene que ser de tipo numero.");
+            Console.Error.WriteLine($"  at línea {t.Line} ('{t.Lexeme}')");
         }
+        hadRuntimeError = true;
     }
-
-    private void checkedNumberOperands(Token operatorToken, Object left, Object right)
+    
+        private bool IsTruthy(object obj)
     {
-        if (!(left is double) || !(right is double))
-        {
-            throw new RuntimeError(operatorToken, "Both operands must be numbers.");
-        }
-    }
-
-    private Object Evaluate(Expr expr)
-    {
-        return expr.Accept(this);
+        if (obj == null) return false;
+        if (obj is bool b) return b;
+        // Otros tipos (números, strings, etc.) siempre "verdaderos"
+        return true;
     }
 
 }
 
-class RuntimeError : Exception
+
+public class RuntimeError : Exception
 {
     public Token Token { get; }
+    public List<Token> CallStack { get; } = new List<Token>();
 
-    public RuntimeError(Token token, string message) : base(message)
+    public RuntimeError(Token token, string message)
+        : base(message)
     {
         Token = token;
+        CallStack.Add(token);
     }
-} 
+
+    
+    public void Push(Token token) => CallStack.Add(token);
+}

@@ -45,7 +45,7 @@ public class AstPrinter : IVisitor<string>
 
     public string VisitUnaryExpr(Unary expr)
     {
-        return Parenthesize(expr.Operator, expr.Right);
+        return Parenthesize(expr.Operator.Lexeme, expr.Right);
     }
 
     public string VisitIdentifier(Identifier identifier)

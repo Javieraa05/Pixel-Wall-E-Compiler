@@ -46,7 +46,8 @@ public enum TokenType
 
     // Tokens especiales
     EOL,
-    EOF
+    EOF,
+    None
 }
 
 // Clase Token: almacena el tipo, lexema y posición del token.

@@ -7,7 +7,7 @@ public class Parser
 {
     private readonly List<Token> tokens;
     private int current = 0;
-
+    public static bool hadError = false;
     public Parser(List<Token> tokens)
     {
         this.tokens = tokens;
@@ -22,6 +22,7 @@ public class Parser
         catch (ParseError)
         {
             Synchronize();
+            hadError = true;
             return null;
         }
     }
@@ -136,7 +137,7 @@ public class Parser
         {
             Token op = Previous();
             Expr right = Unary();
-            return new Unary(op.Lexeme, right);
+            return new Unary(op, right);
         }
         return Primary();
     }
@@ -145,7 +146,7 @@ public class Parser
     {
         if (Match(TokenType.Number))
         {
-            double value = double.Parse(Previous().Lexeme, CultureInfo.InvariantCulture);
+            int value = int.Parse(Previous().Lexeme, CultureInfo.InvariantCulture);
             return new Literal(value);
         }
         if (Match(TokenType.String))
