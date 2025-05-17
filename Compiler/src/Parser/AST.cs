@@ -93,10 +93,10 @@ public class Literal : Expr
 
 public class Unary : Expr
 {
-    public string Operator { get; }
+    public Token Operator { get; }
     public Expr Right { get; }
 
-    public Unary(string op, Expr right)
+    public Unary(Token op, Expr right)
     {
         Operator = op;
         Right = right;

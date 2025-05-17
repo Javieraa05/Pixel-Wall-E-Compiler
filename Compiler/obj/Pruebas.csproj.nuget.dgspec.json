@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\javie\\Desktop\\Proyecto\\2do Proyecto de Programacion\\Pixel-Wall-E-Compiler\\Interpreter\\Pruebas.csproj": {}
+    "C:\\Users\\javie\\Desktop\\Proyecto\\2do Proyecto de Programacion\\Pixel-Wall-E-Compiler\\Compiler\\Pruebas.csproj": {}
   },
   "projects": {
-    "C:\\Users\\javie\\Desktop\\Proyecto\\2do Proyecto de Programacion\\Pixel-Wall-E-Compiler\\Interpreter\\Pruebas.csproj": {
+    "C:\\Users\\javie\\Desktop\\Proyecto\\2do Proyecto de Programacion\\Pixel-Wall-E-Compiler\\Compiler\\Pruebas.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\javie\\Desktop\\Proyecto\\2do Proyecto de Programacion\\Pixel-Wall-E-Compiler\\Interpreter\\Pruebas.csproj",
+        "projectUniqueName": "C:\\Users\\javie\\Desktop\\Proyecto\\2do Proyecto de Programacion\\Pixel-Wall-E-Compiler\\Compiler\\Pruebas.csproj",
         "projectName": "Pruebas",
-        "projectPath": "C:\\Users\\javie\\Desktop\\Proyecto\\2do Proyecto de Programacion\\Pixel-Wall-E-Compiler\\Interpreter\\Pruebas.csproj",
+        "projectPath": "C:\\Users\\javie\\Desktop\\Proyecto\\2do Proyecto de Programacion\\Pixel-Wall-E-Compiler\\Compiler\\Pruebas.csproj",
         "packagesPath": "C:\\Users\\javie\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\javie\\Desktop\\Proyecto\\2do Proyecto de Programacion\\Pixel-Wall-E-Compiler\\Interpreter\\obj\\",
+        "outputPath": "C:\\Users\\javie\\Desktop\\Proyecto\\2do Proyecto de Programacion\\Pixel-Wall-E-Compiler\\Compiler\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\javie\\AppData\\Roaming\\NuGet\\NuGet.Config"
