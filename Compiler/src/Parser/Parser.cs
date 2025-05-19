@@ -8,23 +8,45 @@ public class Parser
     private readonly List<Token> tokens;
     private int current = 0;
     public static bool hadError = false;
+    
     public Parser(List<Token> tokens)
     {
         this.tokens = tokens;
     }
 
-    public Expr Parse()
+    public List<Stmt> Parse()
     {
-        try
+        List<Stmt> statements = new List<Stmt>();
+    
+        while (!IsAtEnd())
         {
-            return Expression();
+            try
+            {
+                statements.Add(Statement());
+            }
+            catch (ParseError)
+            {
+                Synchronize();
+                hadError = true;
+            }
         }
-        catch (ParseError)
-        {
-            Synchronize();
-            hadError = true;
-            return null;
-        }
+    
+        return statements;
+    }
+    
+    private Stmt Statement()
+    {
+        return ExpressionStatement();
+    }
+
+    private Stmt ExpressionStatement()
+    {
+        Expr expr = Expression();
+        if(IsAtEnd())
+            return new ExpressionStmt(expr);
+        // Si no es el final, se espera un salto de línea    
+        Consume(TokenType.EOL, "Esperaba un salto de línea después de la expresión.");
+        return new ExpressionStmt(expr);
     }
 
     private Expr Expression() => Assignment();

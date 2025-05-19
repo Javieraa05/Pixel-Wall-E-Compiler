@@ -1,41 +1,3 @@
-// Definición de nodos del Árbol de Sintaxis Abstracta (AST)
-public abstract class ASTNode
-{
-    // Método Accept genérico para el patrón Visitor
-    public abstract T Accept<T>(IVisitor<T> visitor);
-}
-
-public abstract class Statement : ASTNode { }
-
-// Nodo raíz que contiene una lista de sentencias
-public class ProgramNode : ASTNode
-{
-    public List<Statement> Statements { get; } = new List<Statement>();
-
-    public override T Accept<T>(IVisitor<T> visitor)
-    {
-        return visitor.VisitProgramNode(this);
-    }
-}
-
-
-public class ExpressionStatement : Statement
-{
-    public Expr Expression { get; }
-
-    public ExpressionStatement(Expr expression)
-    {
-        Expression = expression;
-    }
-
-    public override T Accept<T>(IVisitor<T> visitor)
-    {
-        return visitor.VisitExpressionStatement(this);
-    }
-}
-
-
-// 2) Clase abstracta base Expr
 public abstract class Expr : ASTNode
 {
     public abstract override T Accept<T>(IVisitor<T> visitor);
@@ -143,9 +105,3 @@ public class Logical : Expr
     }
     public override T Accept<T>(IVisitor<T> visitor) => visitor.VisitLogicalExpr(this);
 }
-
-
-
-
-
-

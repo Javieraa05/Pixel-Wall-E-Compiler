@@ -10,12 +10,12 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("IVisitor")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("Program")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1b4fc0bd91d82db9f4778caf28741e1fb35d06b1")]
-[assembly: System.Reflection.AssemblyProductAttribute("IVisitor")]
-[assembly: System.Reflection.AssemblyTitleAttribute("IVisitor")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c718ca3b2be27d0acff3221387195eb88b04e8aa")]
+[assembly: System.Reflection.AssemblyProductAttribute("Program")]
+[assembly: System.Reflection.AssemblyTitleAttribute("Program")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
 
 // Generado por la clase WriteCodeFragment de MSBuild.

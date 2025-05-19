@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-public class Interprete : IVisitor<object>
+public class Interpreter : IVisitor<object>
 {
     // Flag para código de salida
     public static bool hadRuntimeError = false;
@@ -45,7 +45,7 @@ public class Interprete : IVisitor<object>
     }
 
     // Ejecutar una sentencia de expresión:
-    public object VisitExpressionStatement(ExpressionStatement stmt)
+    public object VisitExpressionStmt(ExpressionStmt stmt)
     {
         object value = SafeEvaluate(stmt.Expression);
         Console.WriteLine(Stringify(value));  // opcional, si quieres imprimir cada resultado

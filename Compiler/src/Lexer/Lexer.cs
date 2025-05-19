@@ -48,26 +48,6 @@ public class Lexer
 
     private char Current => _position < _source.Length ? _source[_position] : '\0';
 
-    private void Advance()
-    {
-        if (Current == '\n')
-        {
-            _line++;
-            _column = 1;
-        }
-        else
-        {
-            _column++;
-        }
-        _position++;
-    }
-
-    private char Peek(int offset = 1)
-    {
-        int pos = _position + offset;
-        return pos < _source.Length ? _source[pos] : '\0';
-    }
-
     public List<Token> Lex()
     {
         var tokens = new List<Token>();
@@ -238,7 +218,27 @@ public class Lexer
         tokens.Add(new Token(TokenType.EOF, "", _line, _column));
         return tokens;
     }
+    
+    private void Advance()
+    {
+        if (Current == '\n')
+        {
+            _line++;
+            _column = 1;
+        }
+        else
+        {
+            _column++;
+        }
+        _position++;
+    }
 
+    private char Peek(int offset = 1)
+    {
+        int pos = _position + offset;
+        return pos < _source.Length ? _source[pos] : '\0';
+    }
+    
     // Omite espacios y tabulaciones, pero no saltos de línea
     private void SkipWhitespace()
     {
