@@ -17,7 +17,9 @@ public class Parser
     public List<Stmt> Parse()
     {
         List<Stmt> statements = new List<Stmt>();
-    
+
+        statements.Add(ParseSpawnStmt());
+
         while (!IsAtEnd())
         {
             try
@@ -34,8 +36,28 @@ public class Parser
         return statements;
     }
     
+    private Stmt ParseSpawnStmt()
+    {
+        Token keyword = Consume(TokenType.Spawn,"Se esperaba Spawn");
+        
+        Consume(TokenType.LeftParen, "Esperaba '(' después de 'spawn'.");
+
+        Expr x = Expression();
+        Consume(TokenType.Comma, "Esperaba ',' entre los parámetros de spawn.");
+        Expr y = Expression();
+
+        Consume(TokenType.RightParen, "Esperaba ')' después de los parámetros de spawn.");
+
+        if(Peek().Type is TokenType.EOF) return new SpawnStmt(keyword, x, y);
+        
+        Consume(TokenType.EOL, "Esperaba un salto de línea después de la instrucción spawn.");
+
+        return new SpawnStmt(keyword, x, y);
+    }
+
     private Stmt Statement()
     {
+
         return ExpressionStatement();
     }
 

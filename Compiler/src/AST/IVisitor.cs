@@ -11,6 +11,7 @@ public interface IVisitor<T>
 
     // Métodos para nodos de Stmt
     T VisitExpressionStmt(ExpressionStmt stmt);
+    T VisitSpawnStmt(SpawnStmt spawn);
 
     // Métodos para nodos de Program
     T VisitProgramNode(ProgramNode program);

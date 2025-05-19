@@ -23,7 +23,7 @@ public class ProgramNode : ASTNode
 
 public class AstTreePrinter : IVisitor<string>
 {
-    private StringBuilder _builder;
+    private StringBuilder? _builder;
     private const string IndentStep = "│   ";
     private const string Branch = "├── ";
     private const string LastBranch = "└── ";
@@ -67,7 +67,11 @@ public class AstTreePrinter : IVisitor<string>
             case Assign assign:
                 children.Add(assign.Value);
                 break;
-            // Literal e Identifier no tienen hijos
+            case SpawnStmt spawnStmt:
+                children.Add(spawnStmt.ExprX);
+                children.Add(spawnStmt.ExprY);
+                break;
+                // Literal e Identifier no tienen hijos
         }
 
         for (int i = 0; i < children.Count; i++)
@@ -106,6 +110,8 @@ public class AstTreePrinter : IVisitor<string>
     public string VisitIdentifier(Identifier identifier) => string.Empty;
     public string VisitLogicalExpr(Logical expr) => string.Empty;
     public string VisitAssignExpr(Assign expr) => string.Empty;
+    public string VisitSpawnStmt(SpawnStmt expr) => string.Empty;
+    
 }
 
 

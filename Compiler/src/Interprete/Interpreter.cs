@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-public class Interpreter : IVisitor<object>
+/*public class Interpreter : IVisitor<object>
 {
     // Flag para código de salida
     public static bool hadRuntimeError = false;
@@ -246,7 +246,7 @@ public class Interpreter : IVisitor<object>
 
 }
 
-
+*/
 public class RuntimeError : Exception
 {
     public Token Token { get; }

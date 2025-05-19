@@ -5,8 +5,7 @@ class Program
     static void Main(string[] args)
     {
         //ProbarInterprete();
-        string source = @" n <= 6**6
-                           s <= 4*8";
+        string source = @"Spawn(3,3)";
 
         // Paso 1: Analizar léxicamente el código fuente
         Lexer lexer = new Lexer(source);
