@@ -71,7 +71,24 @@ public class AstTreePrinter : IVisitor<string>
                 children.Add(spawnStmt.ExprX);
                 children.Add(spawnStmt.ExprY);
                 break;
-                // Literal e Identifier no tienen hijos
+            case ColorStmt colorStmt:
+                children.Add(colorStmt.Color);
+                break;
+            case SizeStmt sizeStmt:
+                children.Add(sizeStmt.Expr);
+                break;
+            case DrawLineStmt drawLineStmt:
+                children.Add(drawLineStmt.DirX);
+                children.Add(drawLineStmt.DirY);
+                children.Add(drawLineStmt.Distance);
+                break;
+            case DrawCircleStmt drawLineStmt:
+                children.Add(drawLineStmt.DirX);
+                children.Add(drawLineStmt.DirY);
+                children.Add(drawLineStmt.Radius);
+                break;
+
+
         }
 
         for (int i = 0; i < children.Count; i++)
@@ -111,7 +128,11 @@ public class AstTreePrinter : IVisitor<string>
     public string VisitLogicalExpr(Logical expr) => string.Empty;
     public string VisitAssignExpr(Assign expr) => string.Empty;
     public string VisitSpawnStmt(SpawnStmt expr) => string.Empty;
-    
+    public string VisitColorStmt(ColorStmt expr) => string.Empty;
+    public string VisitSizeStmt(SizeStmt expr) => string.Empty;
+    public string VisitDrawLineStmt(DrawLineStmt expr) => string.Empty;
+    public string VisitDrawCircleStmt(DrawCircleStmt expr) => string.Empty;
+
 }
 
 

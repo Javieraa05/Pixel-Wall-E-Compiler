@@ -40,5 +40,73 @@ public class SpawnStmt : Stmt
     }
 }
 
+public class ColorStmt : Stmt
+{
+    public Identifier Color;
+
+    public ColorStmt(Identifier color)
+    {
+        Color = color;
+    }
+
+    public override T Accept<T>(IVisitor<T> visitor)
+    {
+        return visitor.VisitColorStmt(this);
+    }
+}
+
+public class SizeStmt : Stmt
+{
+    public Expr Expr;
+
+    public SizeStmt(Expr expr)
+    {
+        Expr = expr;
+    }
+
+    public override T Accept<T>(IVisitor<T> visitor)
+    {
+        return visitor.VisitSizeStmt(this);
+    }
+}
+public class DrawLineStmt : Stmt
+{
+    public Expr DirX;
+    public Expr DirY;
+    public Expr Distance;
+
+    public DrawLineStmt(Expr dirX, Expr dirY, Expr distance)
+    {
+        DirX = dirX;
+        DirY = dirY;
+        Distance = distance;
+    }
+
+    public override T Accept<T>(IVisitor<T> visitor)
+    {
+        return visitor.VisitDrawLineStmt(this);
+    }
+}
+public class DrawCircleStmt : Stmt
+{
+    public Expr DirX;
+    public Expr DirY;
+    public Expr Radius;
+
+    public DrawCircleStmt(Expr dirX, Expr dirY, Expr radius)
+    {
+        DirX = dirX;
+        DirY = dirY;
+        Radius = radius;
+    }
+
+    public override T Accept<T>(IVisitor<T> visitor)
+    {
+        return visitor.VisitDrawCircleStmt(this);
+    }
+}
+
+
+
 
 

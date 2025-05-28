@@ -36,35 +36,88 @@ public class Parser
         return statements;
     }
     
+    
+
+    private Stmt Statement()
+    {
+        if (Match(TokenType.Color)) return ColorStmt();
+        if (Match(TokenType.Size)) return SizeStmt();
+        if (Match(TokenType.DrawLine)) return DrawLineStmt();
+        if (Match(TokenType.DrawCircle)) return DrawCircleStmt();
+        return ExpressionStatement();
+    }
+
     private Stmt ParseSpawnStmt()
     {
         Token keyword = Consume(TokenType.Spawn,"Se esperaba Spawn");
         
-        Consume(TokenType.LeftParen, "Esperaba '(' después de 'spawn'.");
+        Consume(TokenType.LeftParen, "Esperaba '(' después de 'Spawn'.");
 
         Expr x = Expression();
-        Consume(TokenType.Comma, "Esperaba ',' entre los parámetros de spawn.");
+        Consume(TokenType.Comma, "Esperaba ',' entre los parámetros de Spawn.");
         Expr y = Expression();
 
-        Consume(TokenType.RightParen, "Esperaba ')' después de los parámetros de spawn.");
+        Consume(TokenType.RightParen, "Esperaba ')' después de los parámetros de Spawn.");
 
         if(Peek().Type is TokenType.EOF) return new SpawnStmt(keyword, x, y);
         
-        Consume(TokenType.EOL, "Esperaba un salto de línea después de la instrucción spawn.");
+        Consume(TokenType.EOL, "Esperaba un salto de línea después de la instrucción Spawn.");
 
         return new SpawnStmt(keyword, x, y);
     }
 
-    private Stmt Statement()
+    private Stmt ColorStmt()
     {
+        Consume(TokenType.LeftParen, "Esperaba '(' después de 'Color'.");
+        Identifier color = new Identifier(Peek());
+        Consume(TokenType.Identifier, "Esperaba un parametro valdio");
+        Consume(TokenType.RightParen, "Esperaba ')' después de los parámetros de Color.");
+        if (Peek().Type is TokenType.EOF) return new ColorStmt(color);
+        Consume(TokenType.EOL, "Esperaba un salto de línea después de la instrucción Color.");
+        return new ColorStmt(color);
 
-        return ExpressionStatement();
     }
 
+    private Stmt SizeStmt()
+    {
+        Consume(TokenType.LeftParen, "Esperaba '(' después de 'Size'.");
+        Expr expr = Expression();
+        Consume(TokenType.RightParen, "Esperaba ')' después de los parámetros de Size.");
+        if (Peek().Type is TokenType.EOF) return new SizeStmt(expr);
+        Consume(TokenType.EOL, "Esperaba un salto de línea después de la instrucción Size.");
+        return new SizeStmt(expr);
+    }
+    private Stmt DrawLineStmt()
+    {
+        Consume(TokenType.LeftParen, "Esperaba '(' después de 'DrawLine'.");
+        Expr dirX = Expression();
+        Consume(TokenType.Comma, "Esperaba ',' entre los parámetros de DrawLine.");
+        Expr dirY = Expression();
+        Consume(TokenType.Comma, "Esperaba ',' entre los parámetros de DrawLine.");
+        Expr distance = Expression();
+        Consume(TokenType.RightParen, "Esperaba ')' después de los parámetros de DrawLine.");
+        if (Peek().Type is TokenType.EOF) return new DrawLineStmt(dirX, dirY, distance);
+        Consume(TokenType.EOL, "Esperaba un salto de línea después de la instrucción DrawLine.");
+        return new DrawLineStmt(dirX, dirY, distance);
+    }
+    private Stmt DrawCircleStmt()
+    {
+        Consume(TokenType.LeftParen, "Esperaba '(' después de 'DrawCircle'.");
+        Expr centerX = Expression();
+        Consume(TokenType.Comma, "Esperaba ',' entre los parámetros de DrawCircle.");
+        Expr centerY = Expression();
+        Consume(TokenType.Comma, "Esperaba ',' entre los parámetros de DrawCircle.");
+        Expr radius = Expression();
+        Consume(TokenType.RightParen, "Esperaba ')' después de los parámetros de DrawCircle.");
+        if (Peek().Type is TokenType.EOF)
+            return new DrawCircleStmt(centerX, centerY, radius);
+        Consume(TokenType.EOL, "Esperaba un salto de línea después de la instrucción DrawCircle.");
+        return new DrawCircleStmt(centerX, centerY, radius);
+    }
     private Stmt ExpressionStatement()
     {
         Expr expr = Expression();
-        if(IsAtEnd())
+        if (IsAtEnd())
             return new ExpressionStmt(expr);
         // Si no es el final, se espera un salto de línea    
         Consume(TokenType.EOL, "Esperaba un salto de línea después de la expresión.");

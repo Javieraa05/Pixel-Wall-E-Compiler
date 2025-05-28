@@ -5,11 +5,15 @@ class Program
     static void Main(string[] args)
     {
         //ProbarInterprete();
-        string source = @"Spawn(3,3)";
+        string source = @"  Spawn(3,3)
+                            Color( Black )
+                            Size ( 10+5*4 )
+                            DrawLine( 1, 2, 3 )
+                            DrawCircle( 1, 2, 3 )";   
 
         // Paso 1: Analizar léxicamente el código fuente
         Lexer lexer = new Lexer(source);
-        List<Token> tokens = lexer.Lex();
+        List<Token> tokens = lexer.Lex();   
         foreach (Token token in tokens)
         {
             Console.WriteLine(token.ToString());
