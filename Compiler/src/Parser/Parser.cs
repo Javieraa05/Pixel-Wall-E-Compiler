@@ -9,6 +9,18 @@ public class Parser
     private int current = 0;
     public static bool hadError = false;
     
+    private static readonly Dictionary<TokenType, int> arity = new()
+    {
+        { TokenType.Spawn,        2 },
+        { TokenType.Color,        1 },
+        { TokenType.Size,         1 },
+        { TokenType.DrawLine,     3 },
+        { TokenType.DrawCircle,   3 },
+        { TokenType.DrawRectangle,5 },
+        { TokenType.Fill,         0 },
+        
+    };
+
     public Parser(List<Token> tokens)
     {
         this.tokens = tokens;
@@ -35,15 +47,14 @@ public class Parser
     
         return statements;
     }
-    
-    
 
     private Stmt Statement()
     {
-        if (Match(TokenType.Color)) return ColorStmt();
-        if (Match(TokenType.Size)) return SizeStmt();
-        if (Match(TokenType.DrawLine)) return DrawLineStmt();
-        if (Match(TokenType.DrawCircle)) return DrawCircleStmt();
+         if (Match(TokenType.Spawn, TokenType.Color, TokenType.Size,
+                  TokenType.DrawLine, TokenType.DrawCircle, TokenType.DrawRectangle, TokenType.Fill))
+        {
+            return CallStmt(Previous());
+        }
         return ExpressionStatement();
     }
 
@@ -65,54 +76,48 @@ public class Parser
 
         return new SpawnStmt(keyword, x, y);
     }
+    private Stmt CallStmt(Token keyword)
+    {
+        // 1. Consumir '('
+        Consume(TokenType.LeftParen, $"Esperaba '(' después de '{keyword.Lexeme}'.");
 
-    private Stmt ColorStmt()
-    {
-        Consume(TokenType.LeftParen, "Esperaba '(' después de 'Color'.");
-        Identifier color = new Identifier(Peek());
-        Consume(TokenType.Identifier, "Esperaba un parametro valdio");
-        Consume(TokenType.RightParen, "Esperaba ')' después de los parámetros de Color.");
-        if (Peek().Type is TokenType.EOF) return new ColorStmt(color);
-        Consume(TokenType.EOL, "Esperaba un salto de línea después de la instrucción Color.");
-        return new ColorStmt(color);
+        // 2. Parsear lista de argumentos
+        var args = new List<Expr>();
+        if (!Check(TokenType.RightParen))
+        {
+            do
+            {
+                args.Add(Expression());
+            } while (Match(TokenType.Comma));
+        }
 
-    }
+        // 3. Consumir ')'
+        Consume(TokenType.RightParen, $"Esperaba ')' para cerrar parámetros de '{keyword.Lexeme}'.");
 
-    private Stmt SizeStmt()
-    {
-        Consume(TokenType.LeftParen, "Esperaba '(' después de 'Size'.");
-        Expr expr = Expression();
-        Consume(TokenType.RightParen, "Esperaba ')' después de los parámetros de Size.");
-        if (Peek().Type is TokenType.EOF) return new SizeStmt(expr);
-        Consume(TokenType.EOL, "Esperaba un salto de línea después de la instrucción Size.");
-        return new SizeStmt(expr);
-    }
-    private Stmt DrawLineStmt()
-    {
-        Consume(TokenType.LeftParen, "Esperaba '(' después de 'DrawLine'.");
-        Expr dirX = Expression();
-        Consume(TokenType.Comma, "Esperaba ',' entre los parámetros de DrawLine.");
-        Expr dirY = Expression();
-        Consume(TokenType.Comma, "Esperaba ',' entre los parámetros de DrawLine.");
-        Expr distance = Expression();
-        Consume(TokenType.RightParen, "Esperaba ')' después de los parámetros de DrawLine.");
-        if (Peek().Type is TokenType.EOF) return new DrawLineStmt(dirX, dirY, distance);
-        Consume(TokenType.EOL, "Esperaba un salto de línea después de la instrucción DrawLine.");
-        return new DrawLineStmt(dirX, dirY, distance);
-    }
-    private Stmt DrawCircleStmt()
-    {
-        Consume(TokenType.LeftParen, "Esperaba '(' después de 'DrawCircle'.");
-        Expr centerX = Expression();
-        Consume(TokenType.Comma, "Esperaba ',' entre los parámetros de DrawCircle.");
-        Expr centerY = Expression();
-        Consume(TokenType.Comma, "Esperaba ',' entre los parámetros de DrawCircle.");
-        Expr radius = Expression();
-        Consume(TokenType.RightParen, "Esperaba ')' después de los parámetros de DrawCircle.");
-        if (Peek().Type is TokenType.EOF)
-            return new DrawCircleStmt(centerX, centerY, radius);
-        Consume(TokenType.EOL, "Esperaba un salto de línea después de la instrucción DrawCircle.");
-        return new DrawCircleStmt(centerX, centerY, radius);
+        // 4. Verificar aridad
+        int expected = arity[keyword.Type];
+        if (args.Count != expected)
+        {
+            throw Error(keyword,
+                $"'{keyword.Lexeme}' espera {expected} argumentos, pero recibió {args.Count}.");
+        }
+
+        // 5. Consumir EOL opcional
+        if (!IsAtEnd() && Peek().Type == TokenType.EOL)
+            Advance();
+
+        // 6. Construir el Stmt adecuado
+        return keyword.Type switch
+        {
+            TokenType.Spawn => new SpawnStmt(keyword, args[0], args[1]),
+            TokenType.Color => new ColorStmt(args[0]),
+            TokenType.Size => new SizeStmt(args[0]),
+            TokenType.DrawLine => new DrawLineStmt(args[0], args[1], args[2]),
+            TokenType.DrawCircle => new DrawCircleStmt(args[0], args[1], args[2]),
+            TokenType.DrawRectangle => new DrawRectangleStmt(args[0], args[1], args[2], args[3], args[4]),
+            TokenType.Fill => new FillStmt(),
+            _ => throw Error(keyword, $"Instrucción desconocida: {keyword.Lexeme}")
+        };
     }
     private Stmt ExpressionStatement()
     {

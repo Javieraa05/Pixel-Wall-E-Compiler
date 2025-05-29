@@ -16,6 +16,10 @@ public interface IVisitor<T>
     T VisitSizeStmt(SizeStmt size);
     T VisitDrawLineStmt(DrawLineStmt drawLine);
     T VisitDrawCircleStmt(DrawCircleStmt drawCircleStmt);
+    T VisitDrawRectangleStmt(DrawRectangleStmt drawRectangleleStmt);
+    T VisitFillStmt(FillStmt fillStmt);
+    
+
 
     // Métodos para nodos de Program
     T VisitProgramNode(ProgramNode program);

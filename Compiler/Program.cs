@@ -9,7 +9,9 @@ class Program
                             Color( Black )
                             Size ( 10+5*4 )
                             DrawLine( 1, 2, 3 )
-                            DrawCircle( 1, 2, 3 )";   
+                            DrawCircle( 1, 2, 3 )
+                            DrawRectangle( 1, 2, 3, 3, 3)
+                            Fill()";   
 
         // Paso 1: Analizar léxicamente el código fuente
         Lexer lexer = new Lexer(source);

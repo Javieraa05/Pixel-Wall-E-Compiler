@@ -42,9 +42,9 @@ public class SpawnStmt : Stmt
 
 public class ColorStmt : Stmt
 {
-    public Identifier Color;
+    public Expr Color;
 
-    public ColorStmt(Identifier color)
+    public ColorStmt(Expr color)
     {
         Color = color;
     }
@@ -104,6 +104,41 @@ public class DrawCircleStmt : Stmt
     {
         return visitor.VisitDrawCircleStmt(this);
     }
+}
+
+public class DrawRectangleStmt : Stmt
+    {
+        public Expr DirX;
+        public Expr DirY;
+        public Expr Distance;
+        public Expr Width;
+        public Expr Height;
+
+        public DrawRectangleStmt(Expr dirX, Expr dirY, Expr distance, Expr width, Expr height)
+        {
+            DirX = dirX;
+            DirY = dirY;
+            Distance = distance;
+            Width = width;
+            Height = height;
+        }
+
+        public override T Accept<T>(IVisitor<T> visitor)
+        {
+            return visitor.VisitDrawRectangleStmt(this);
+        }
+    }
+
+public class FillStmt : Stmt
+{
+            public FillStmt()
+            {
+            }
+
+            public override T Accept<T>(IVisitor<T> visitor)
+            {
+                return visitor.VisitFillStmt(this);
+            }
 }
 
 

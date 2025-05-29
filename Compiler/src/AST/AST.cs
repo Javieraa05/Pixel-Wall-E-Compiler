@@ -87,8 +87,12 @@ public class AstTreePrinter : IVisitor<string>
                 children.Add(drawLineStmt.DirY);
                 children.Add(drawLineStmt.Radius);
                 break;
-
-
+            case DrawRectangleStmt drawRectangleStmt:
+                children.Add(drawRectangleStmt.DirX);
+                children.Add(drawRectangleStmt.DirY);
+                children.Add(drawRectangleStmt.Width);
+                children.Add(drawRectangleStmt.Height);
+                break;
         }
 
         for (int i = 0; i < children.Count; i++)
@@ -132,6 +136,9 @@ public class AstTreePrinter : IVisitor<string>
     public string VisitSizeStmt(SizeStmt expr) => string.Empty;
     public string VisitDrawLineStmt(DrawLineStmt expr) => string.Empty;
     public string VisitDrawCircleStmt(DrawCircleStmt expr) => string.Empty;
+    public string VisitDrawRectangleStmt(DrawRectangleStmt expr) => string.Empty;
+    public string VisitFillStmt(FillStmt expr) => string.Empty;
+
 
 }
 
