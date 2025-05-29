@@ -141,6 +141,107 @@ public class FillStmt : Stmt
             }
 }
 
+public class GetActualXStmt : Stmt
+{
+    public GetActualXStmt() { }
+
+    public override T Accept<T>(IVisitor<T> visitor)
+    {
+        return visitor.VisitGetActualXStmt(this);
+    }
+}
+
+public class GetActualYStmt : Stmt
+{
+    public GetActualYStmt() { }
+
+    public override T Accept<T>(IVisitor<T> visitor)
+    {
+        return visitor.VisitGetActualYStmt(this);
+    }
+}
+
+public class GetCanvasSizeStmt : Stmt
+{
+    public GetCanvasSizeStmt() { }
+
+    public override T Accept<T>(IVisitor<T> visitor)
+    {
+        return visitor.VisitGetCanvasSizeStmt(this);
+    }
+}
+
+public class GetColorCountStmt : Stmt
+{
+    public Expr Color { get; }
+    public Expr X1 { get; }
+    public Expr Y1 { get; }
+    public Expr X2 { get; }
+    public Expr Y2 { get; }
+
+    public GetColorCountStmt(Expr color, Expr x1, Expr y1, Expr x2, Expr y2)
+    {
+        Color = color;
+        X1 = x1;
+        Y1 = y1;
+        X2 = x2;
+        Y2 = y2;
+    }
+
+    public override T Accept<T>(IVisitor<T> visitor)
+    {
+        return visitor.VisitGetColorCountStmt(this);
+    }
+}
+
+public class IsBrushColorStmt : Stmt
+{
+    public Expr Color { get; }
+
+    public IsBrushColorStmt(Expr color)
+    {
+        Color = color;
+    }
+
+    public override T Accept<T>(IVisitor<T> visitor)
+    {
+        return visitor.VisitIsBrushColorStmt(this);
+    }
+}
+
+public class IsBrushSizeStmt : Stmt
+{
+    public Expr Size { get; }
+
+    public IsBrushSizeStmt(Expr size)
+    {
+        Size = size;
+    }
+
+    public override T Accept<T>(IVisitor<T> visitor)
+    {
+        return visitor.VisitIsBrushSizeStmt(this);
+    }
+}
+
+public class IsCanvasColorStmt : Stmt
+{
+    public Expr Color { get; }
+    public Expr Vertical { get; }
+    public Expr Horizontal { get; }
+
+    public IsCanvasColorStmt(Expr color, Expr vertical, Expr horizontal)
+    {
+        Color = color;
+        Vertical = vertical;
+        Horizontal = horizontal;
+    }
+
+    public override T Accept<T>(IVisitor<T> visitor)
+    {
+        return visitor.VisitIsCanvasColorStmt(this);
+    }
+}
 
 
 

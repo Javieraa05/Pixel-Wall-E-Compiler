@@ -18,6 +18,13 @@ public interface IVisitor<T>
     T VisitDrawCircleStmt(DrawCircleStmt drawCircleStmt);
     T VisitDrawRectangleStmt(DrawRectangleStmt drawRectangleleStmt);
     T VisitFillStmt(FillStmt fillStmt);
+    T VisitGetActualXStmt(GetActualXStmt getActualXNode);
+    T VisitGetActualYStmt(GetActualYStmt getActualYNode);
+    T VisitGetCanvasSizeStmt(GetCanvasSizeStmt getCanvasSizeNode);
+    T VisitGetColorCountStmt(GetColorCountStmt getColorCountNode);
+    T VisitIsBrushColorStmt(IsBrushColorStmt isBrushColorNode);
+    T VisitIsBrushSizeStmt(IsBrushSizeStmt isBrushSizeNode);
+    T VisitIsCanvasColorStmt(IsCanvasColorStmt isCanvasColorNode);
     
 
 

@@ -18,7 +18,14 @@ public class Parser
         { TokenType.DrawCircle,   3 },
         { TokenType.DrawRectangle,5 },
         { TokenType.Fill,         0 },
-        
+        { TokenType.GetActualX,   0 },
+        { TokenType.GetActualY,   0 },
+        { TokenType.GetCanvasSize,0 },
+        { TokenType.GetColorCount,5 },
+        { TokenType.IsBrushColor, 1 },
+        { TokenType.IsBrushSize,  1 },
+        { TokenType.IsCanvasColor,3 },
+
     };
 
     public Parser(List<Token> tokens)
@@ -50,8 +57,11 @@ public class Parser
 
     private Stmt Statement()
     {
-         if (Match(TokenType.Spawn, TokenType.Color, TokenType.Size,
-                  TokenType.DrawLine, TokenType.DrawCircle, TokenType.DrawRectangle, TokenType.Fill))
+         if (Match( TokenType.Spawn, TokenType.Color, TokenType.Size,
+                    TokenType.DrawLine, TokenType.DrawCircle, TokenType.DrawRectangle,
+                    TokenType.Fill, TokenType.GetActualX, TokenType.GetActualY, TokenType.GetCanvasSize,
+                    TokenType.GetColorCount, TokenType.IsBrushColor, TokenType.IsBrushSize,
+                    TokenType.IsCanvasColor))
         {
             return CallStmt(Previous());
         }
@@ -116,6 +126,13 @@ public class Parser
             TokenType.DrawCircle => new DrawCircleStmt(args[0], args[1], args[2]),
             TokenType.DrawRectangle => new DrawRectangleStmt(args[0], args[1], args[2], args[3], args[4]),
             TokenType.Fill => new FillStmt(),
+            TokenType.GetActualX => new GetActualXStmt(),
+            TokenType.GetActualY => new GetActualYStmt(),
+            TokenType.GetCanvasSize => new GetCanvasSizeStmt(),
+            TokenType.GetColorCount => new GetColorCountStmt(args[0], args[1], args[2], args[3], args[4]),
+            TokenType.IsBrushColor => new IsBrushColorStmt(args[0]),
+            TokenType.IsBrushSize => new IsBrushSizeStmt(args[0]),
+            TokenType.IsCanvasColor => new IsCanvasColorStmt(args[0], args[1], args[2]),
             _ => throw Error(keyword, $"Instrucción desconocida: {keyword.Lexeme}")
         };
     }

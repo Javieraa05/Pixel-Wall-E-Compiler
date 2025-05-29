@@ -138,7 +138,13 @@ public class AstTreePrinter : IVisitor<string>
     public string VisitDrawCircleStmt(DrawCircleStmt expr) => string.Empty;
     public string VisitDrawRectangleStmt(DrawRectangleStmt expr) => string.Empty;
     public string VisitFillStmt(FillStmt expr) => string.Empty;
-
+    public string VisitGetActualXStmt(GetActualXStmt getActualXNode) => string.Empty;
+    public string VisitGetActualYStmt(GetActualYStmt getActualYNode) => string.Empty;
+    public string VisitGetCanvasSizeStmt(GetCanvasSizeStmt getCanvasSizeNode) => string.Empty;
+    public string VisitGetColorCountStmt(GetColorCountStmt getColorCountNode) => string.Empty;
+    public string VisitIsBrushColorStmt(IsBrushColorStmt isBrushColorNode) => string.Empty;
+    public string VisitIsBrushSizeStmt(IsBrushSizeStmt isBrushSizeNode) => string.Empty;
+    public string VisitIsCanvasColorStmt(IsCanvasColorStmt isCanvasColorNode) => string.Empty;
 
 }
 
