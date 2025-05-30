@@ -8,7 +8,7 @@ public class Parser
     private readonly List<Token> tokens;
     private int current = 0;
     public static bool hadError = false;
-    
+
     private static readonly Dictionary<TokenType, int> arity = new()
     {
         { TokenType.Spawn,        2 },
@@ -51,27 +51,29 @@ public class Parser
                 hadError = true;
             }
         }
-    
+
         return statements;
     }
 
     private Stmt Statement()
     {
-         if (Match( TokenType.Spawn, TokenType.Color, TokenType.Size,
-                    TokenType.DrawLine, TokenType.DrawCircle, TokenType.DrawRectangle,
-                    TokenType.Fill, TokenType.GetActualX, TokenType.GetActualY, TokenType.GetCanvasSize,
-                    TokenType.GetColorCount, TokenType.IsBrushColor, TokenType.IsBrushSize,
-                    TokenType.IsCanvasColor))
+        if (Match(TokenType.Spawn, TokenType.Color, TokenType.Size,
+                   TokenType.DrawLine, TokenType.DrawCircle, TokenType.DrawRectangle,
+                   TokenType.Fill, TokenType.GetActualX, TokenType.GetActualY, TokenType.GetCanvasSize,
+                   TokenType.GetColorCount, TokenType.IsBrushColor, TokenType.IsBrushSize,
+                   TokenType.IsCanvasColor))
         {
             return CallStmt(Previous());
         }
+        else if (Match(TokenType.GoTo)) return ParseGoToStmt();
+
         return ExpressionStatement();
     }
 
     private Stmt ParseSpawnStmt()
     {
-        Token keyword = Consume(TokenType.Spawn,"Se esperaba Spawn");
-        
+        Token keyword = Consume(TokenType.Spawn, "Se esperaba Spawn");
+
         Consume(TokenType.LeftParen, "Esperaba '(' después de 'Spawn'.");
 
         Expr x = Expression();
@@ -80,12 +82,30 @@ public class Parser
 
         Consume(TokenType.RightParen, "Esperaba ')' después de los parámetros de Spawn.");
 
-        if(Peek().Type is TokenType.EOF) return new SpawnStmt(keyword, x, y);
-        
+        if (Peek().Type is TokenType.EOF) return new SpawnStmt(keyword, x, y);
+
         Consume(TokenType.EOL, "Esperaba un salto de línea después de la instrucción Spawn.");
 
         return new SpawnStmt(keyword, x, y);
     }
+
+    private Stmt ParseGoToStmt()
+    {
+        Consume(TokenType.LeftBracket, "Esperaba '[' después de 'GoTo'.");
+        Expr Label = Expression();
+        Consume(TokenType.RightBracket, $"Esperaba ']' despues de Label.");
+
+        Consume(TokenType.LeftParen, "Esperaba '(' después de 'GoTo'.");
+        Expr Condition = Expression();
+        Consume(TokenType.RightParen, "Esperaba ')' después de Condition.");
+
+        if (Peek().Type is TokenType.EOF) return new GoToStmt(Label, Condition);
+
+        Consume(TokenType.EOL, "Esperaba un salto de línea después de 'GoTo'.");
+
+        return new GoToStmt(Label, Condition);
+    }
+
     private Stmt CallStmt(Token keyword)
     {
         // 1. Consumir '('
@@ -335,36 +355,37 @@ public class Parser
     }
 
     private void Synchronize()
-{
-    // Descartar el token que provocó el error
-    Advance();
-
-    while (!IsAtEnd())
     {
-        // Si vemos el inicio de una nueva instrucción o control,
-        // consideramos que ya estamos sincronizados
-        switch (Peek().Type)
-        {
-            // Instrucciones del lenguaje
-            case TokenType.Spawn:
-            case TokenType.Color:
-            case TokenType.Size:
-            case TokenType.DrawLine:
-            case TokenType.DrawCircle:
-            case TokenType.DrawRectangle:
-            case TokenType.Fill:
-
-            // Declaración de variable
-            case TokenType.Identifier:
-
-            // Salto condicional
-            case TokenType.GoTo:
-
-                return;
-        }
+        // Descartar el token que provocó el error
         Advance();
+
+        while (!IsAtEnd())
+        {
+            // Si vemos el inicio de una nueva instrucción o control,
+            // consideramos que ya estamos sincronizados
+            switch (Peek().Type)
+            {
+                // Instrucciones del lenguaje
+                case TokenType.Spawn:
+                case TokenType.Color:
+                case TokenType.Size:
+                case TokenType.DrawLine:
+                case TokenType.DrawCircle:
+                case TokenType.DrawRectangle:
+                case TokenType.Fill:
+
+                // Declaración de variable
+                case TokenType.Identifier:
+
+                // Salto condicional
+                case TokenType.GoTo:
+
+                    return;
+            }
+            Advance();
+        }
     }
-}
+    
 }
 
 // Excepción usada para errores de parseo

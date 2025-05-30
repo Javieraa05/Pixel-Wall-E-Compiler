@@ -93,6 +93,28 @@ public class AstTreePrinter : IVisitor<string>
                 children.Add(drawRectangleStmt.Width);
                 children.Add(drawRectangleStmt.Height);
                 break;
+            case GetColorCountStmt getColorCountStmt:
+                children.Add(getColorCountStmt.Color);
+                children.Add(getColorCountStmt.X1);
+                children.Add(getColorCountStmt.Y1);
+                children.Add(getColorCountStmt.X2);
+                children.Add(getColorCountStmt.Y2);
+                break;
+            case IsBrushColorStmt isBrushColorStmt:
+                children.Add(isBrushColorStmt.Color);
+                break;
+            case IsBrushSizeStmt isBrushSizeStmt:
+                children.Add(isBrushSizeStmt.Size);
+                break;
+            case IsCanvasColorStmt isCanvasColorStmt:
+                children.Add(isCanvasColorStmt.Color);
+                children.Add(isCanvasColorStmt.Vertical);
+                children.Add(isCanvasColorStmt.Horizontal);
+                break;
+            case GoToStmt goToStmt:
+                children.Add(goToStmt.Label);
+                children.Add(goToStmt.Condition);
+                break;
         }
 
         for (int i = 0; i < children.Count; i++)
@@ -145,6 +167,7 @@ public class AstTreePrinter : IVisitor<string>
     public string VisitIsBrushColorStmt(IsBrushColorStmt isBrushColorNode) => string.Empty;
     public string VisitIsBrushSizeStmt(IsBrushSizeStmt isBrushSizeNode) => string.Empty;
     public string VisitIsCanvasColorStmt(IsCanvasColorStmt isCanvasColorNode) => string.Empty;
+    public string VisitGoToStmt(GoToStmt GoToNode) => string.Empty;
 
 }
 

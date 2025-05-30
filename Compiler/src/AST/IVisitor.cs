@@ -25,6 +25,7 @@ public interface IVisitor<T>
     T VisitIsBrushColorStmt(IsBrushColorStmt isBrushColorNode);
     T VisitIsBrushSizeStmt(IsBrushSizeStmt isBrushSizeNode);
     T VisitIsCanvasColorStmt(IsCanvasColorStmt isCanvasColorNode);
+    T VisitGoToStmt(GoToStmt GoToNode);
     
 
 

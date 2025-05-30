@@ -6,14 +6,7 @@ class Program
     {
         //ProbarInterprete();
         string source = @"Spawn(4,5)
-                          GetActualX()
-                          GetActualY()
-                          GetCanvasSize()
-                          GetColorCount(1,2,3,4,5)
-                          IsBrushColor(1)
-                          IsBrushSize(1)
-                          IsCanvasColor(1,2,3)
-";   
+                          GoTo [Hi] (7<8)";   
 
         // Paso 1: Analizar léxicamente el código fuente
         Lexer lexer = new Lexer(source);

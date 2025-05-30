@@ -243,6 +243,23 @@ public class IsCanvasColorStmt : Stmt
     }
 }
 
+public class GoToStmt : Stmt
+{
+    public Expr Label;
+    public Expr Condition;
+
+    public GoToStmt(Expr label, Expr condition)
+    {
+        Label = label;
+        Condition = condition;
+    }
+
+    public override T Accept<T>(IVisitor<T> visitor)
+    {
+        return visitor.VisitGoToStmt(this);
+    }
+}
+
 
 
 
