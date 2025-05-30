@@ -40,9 +40,9 @@ public class Grouping : Expr
 
 public class Literal : Expr
 {
-    public object Value { get; }
+    public int Value { get; }
 
-    public Literal(object value)
+    public Literal(int value)
     {
         Value = value;
     }
@@ -70,10 +70,13 @@ public class Unary : Expr
     }
 }
 
-public class Identifier : Expr {
-    
+public class Identifier : Expr 
+{
     public Token Name { get; }
-    public Identifier(Token name) { Name = name; }
+    public Identifier(Token name)
+    {
+        Name = name;
+    }
     public override T Accept<T>(IVisitor<T> visitor) {
         return visitor.VisitIdentifier(this);
     }

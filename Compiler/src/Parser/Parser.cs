@@ -91,6 +91,7 @@ public class Parser
 
     private Stmt ParseGoToStmt()
     {
+        Token keyword = Previous();
         Consume(TokenType.LeftBracket, "Esperaba '[' después de 'GoTo'.");
         Expr Label = Expression();
         Consume(TokenType.RightBracket, $"Esperaba ']' despues de Label.");
@@ -99,11 +100,11 @@ public class Parser
         Expr Condition = Expression();
         Consume(TokenType.RightParen, "Esperaba ')' después de Condition.");
 
-        if (Peek().Type is TokenType.EOF) return new GoToStmt(Label, Condition);
+        if (Peek().Type is TokenType.EOF) return new GoToStmt(keyword, Label, Condition);
 
         Consume(TokenType.EOL, "Esperaba un salto de línea después de 'GoTo'.");
 
-        return new GoToStmt(Label, Condition);
+        return new GoToStmt(keyword, Label, Condition);
     }
 
     private Stmt CallStmt(Token keyword)
@@ -140,19 +141,19 @@ public class Parser
         return keyword.Type switch
         {
             TokenType.Spawn => new SpawnStmt(keyword, args[0], args[1]),
-            TokenType.Color => new ColorStmt(args[0]),
-            TokenType.Size => new SizeStmt(args[0]),
-            TokenType.DrawLine => new DrawLineStmt(args[0], args[1], args[2]),
-            TokenType.DrawCircle => new DrawCircleStmt(args[0], args[1], args[2]),
-            TokenType.DrawRectangle => new DrawRectangleStmt(args[0], args[1], args[2], args[3], args[4]),
+            TokenType.Color => new ColorStmt(keyword, args[0]),
+            TokenType.Size => new SizeStmt(keyword, args[0]),
+            TokenType.DrawLine => new DrawLineStmt(keyword, args[0], args[1], args[2]),
+            TokenType.DrawCircle => new DrawCircleStmt(keyword, args[0], args[1], args[2]),
+            TokenType.DrawRectangle => new DrawRectangleStmt(keyword, args[0], args[1], args[2], args[3], args[4]),
             TokenType.Fill => new FillStmt(),
             TokenType.GetActualX => new GetActualXStmt(),
             TokenType.GetActualY => new GetActualYStmt(),
             TokenType.GetCanvasSize => new GetCanvasSizeStmt(),
-            TokenType.GetColorCount => new GetColorCountStmt(args[0], args[1], args[2], args[3], args[4]),
-            TokenType.IsBrushColor => new IsBrushColorStmt(args[0]),
-            TokenType.IsBrushSize => new IsBrushSizeStmt(args[0]),
-            TokenType.IsCanvasColor => new IsCanvasColorStmt(args[0], args[1], args[2]),
+            TokenType.GetColorCount => new GetColorCountStmt(keyword, args[0], args[1], args[2], args[3], args[4]),
+            TokenType.IsBrushColor => new IsBrushColorStmt(keyword, args[0]),
+            TokenType.IsBrushSize => new IsBrushSizeStmt(keyword, args[0]),
+            TokenType.IsCanvasColor => new IsCanvasColorStmt(keyword, args[0], args[1], args[2]),
             _ => throw Error(keyword, $"Instrucción desconocida: {keyword.Lexeme}")
         };
     }
@@ -290,7 +291,7 @@ public class Parser
         }
         if (Match(TokenType.String))
         {
-            return new Literal(Previous().Lexeme);
+            return new Identifier(Previous());
         }
         if (Match(TokenType.LeftParen))
         {

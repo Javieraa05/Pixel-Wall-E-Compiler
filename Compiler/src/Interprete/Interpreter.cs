@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-/*public class Interpreter : IVisitor<object>
+public class Interpreter : IVisitor<object>
 {
     // Flag para código de salida
     public static bool hadRuntimeError = false;
@@ -19,12 +19,22 @@ using System.Collections.Generic;
         try
         {
             object result = SafeEvaluate(expr);
-            Console.WriteLine(Stringify(result));
         }
         catch (RuntimeError error)
         {
             ReportRuntimeError(error);
         }
+    }
+    // Método que inicia la interpretación de un programa completo:
+    public object VisitProgramNode(ProgramNode program)
+    {
+        object last = null;
+        foreach (var stmt in program.Statements)
+        {
+            last = stmt.Accept(this);
+            Console.WriteLine(Stringify(last));
+        }
+        return last;
     }
 
     public object VisitIdentifier(Identifier id)
@@ -32,23 +42,11 @@ using System.Collections.Generic;
         // Recupera el valor de la variable
         return env.Get(id.Name.Lexeme);
     }
-    
-     // Método que inicia la interpretación de un programa completo:
-    public object VisitProgramNode(ProgramNode program)
-    {
-        object last = null;
-        foreach (var stmt in program.Statements)
-        {
-            last = stmt.Accept(this);
-        }
-        return last;
-    }
 
     // Ejecutar una sentencia de expresión:
     public object VisitExpressionStmt(ExpressionStmt stmt)
     {
         object value = SafeEvaluate(stmt.Expression);
-        Console.WriteLine(Stringify(value));  // opcional, si quieres imprimir cada resultado
         return value;
     }
 
@@ -79,35 +77,6 @@ using System.Collections.Generic;
         // Si no cortocircuitó, evalúa y retorna right
         return SafeEvaluate(expr.Right);
     }
-
-    /// <summary>
-    /// Evalúa el árbol y traduce cualquier InvalidCastException en RuntimeError.
-    /// </summary>
-    private object SafeEvaluate(Expr expr)
-    {
-        try
-        {
-            return expr.Accept(this);
-        }
-        catch (InvalidCastException)
-        {
-            Token token = ExtractToken(expr);
-            throw new RuntimeError(token, "Operación con tipos inválidos.");
-        }
-    }
-
-    private Token ExtractToken(Expr expr)
-    {
-        switch (expr)
-        {
-            case Binary b: return b.Operator;
-            case Unary u: return u.Operator;
-            case Grouping g: return ExtractToken(g.Expression);
-            case Identifier l: return l.Name;
-            default: return new Token(TokenType.None, "", 0, 0);
-        }
-    }
-
     public object VisitLiteralExpr(Literal literal)
     {
         return literal.Value;
@@ -208,6 +177,132 @@ using System.Collections.Generic;
         }
     }
 
+    public object VisitSpawnStmt(SpawnStmt spawnStmt)
+    {
+        var X = (int)SafeEvaluate(spawnStmt.ExprX);
+        var Y = (int)SafeEvaluate(spawnStmt.ExprY);
+
+        return $"Wall-E comienza en ({X}, {Y}) ";
+    }
+
+    public object VisitColorStmt(ColorStmt colorStmt)
+    {
+        var Color = (string)SafeEvaluate(colorStmt.Color);
+        return $"Brocha cambiada a {Color}";
+    }
+    public object VisitSizeStmt(SizeStmt sizeStmt)
+    {
+        var Size = (int)SafeEvaluate(sizeStmt.Size);
+        return $"Tamanno de brocha cambiado a {Size}";
+    }
+    public object VisitDrawLineStmt(DrawLineStmt drawLineStmt)
+    {
+        var X = (int)SafeEvaluate(drawLineStmt.DirX);
+        var Y = (int)SafeEvaluate(drawLineStmt.DirY);
+        var Distance = (int)SafeEvaluate(drawLineStmt.Distance);
+
+        CheckValidDirection(drawLineStmt.Keyword, X, Y);
+
+        return $"Wall-E pinta linea en ({X}, {Y}) de distancia {Distance}";
+    }
+    public object VisitDrawCircleStmt(DrawCircleStmt drawCircleStmt)
+    {
+        var X = (int)SafeEvaluate(drawCircleStmt.DirX);
+        var Y = (int)SafeEvaluate(drawCircleStmt.DirY);
+        var Radius = (int)SafeEvaluate(drawCircleStmt.Radius);
+
+        CheckValidDirection(drawCircleStmt.Keyword, X, Y);
+
+        return $"Wall-E pinta circulo en ({X}, {Y}) de radio {Radius}";
+    }
+    public object VisitDrawRectangleStmt(DrawRectangleStmt drawRectangleStmt)
+    {
+        var X = (int)SafeEvaluate(drawRectangleStmt.DirX);
+        var Y = (int)SafeEvaluate(drawRectangleStmt.DirY);
+        var Distance = (int)SafeEvaluate(drawRectangleStmt.Distance);
+        var Width = (int)SafeEvaluate(drawRectangleStmt.Width);
+        var Height = (int)SafeEvaluate(drawRectangleStmt.Height);
+
+        CheckValidDirection(drawRectangleStmt.Keyword, X, Y);
+
+        return $"Wall-E pinta rectangulo en ({X}, {Y}) a {Distance} de ancho {Width} y largo {Height}";
+
+    }
+    public object VisitFillStmt(FillStmt fillStmt)
+    {
+        return "Fill";
+    }
+    public object VisitGetActualXStmt(GetActualXStmt getActualXNode)
+    {
+        return "X actual";
+    }
+    public object VisitGetActualYStmt(GetActualYStmt getActualYNode)
+    {
+        return "Y actual";
+    }
+    public object VisitGetCanvasSizeStmt(GetCanvasSizeStmt getCanvasSizeNode)
+    {
+        return "Tamanno del canvas";
+    }
+    public object VisitGetColorCountStmt(GetColorCountStmt getColorCountNode)
+    {
+        var Color = (string)SafeEvaluate(getColorCountNode.Color);
+        var X1 = (int)SafeEvaluate(getColorCountNode.X1);
+        var Y1 = (int)SafeEvaluate(getColorCountNode.Y1);
+        var X2 = (int)SafeEvaluate(getColorCountNode.X2);
+        var Y2 = (int)SafeEvaluate(getColorCountNode.Y2);
+
+        return $"Cantidad de {Color} de ({X1}, {X2}) a ({X2},{Y2}) ";
+    }
+    public object VisitIsBrushColorStmt(IsBrushColorStmt isBrushColorNode)
+    {
+        var Color = (string)SafeEvaluate(isBrushColorNode.Color);
+        return $"Es la brocha {Color}?";
+    }
+    public object VisitIsBrushSizeStmt(IsBrushSizeStmt isBrushSizeNode)
+    {
+        var Size = (int)SafeEvaluate(isBrushSizeNode.Size);
+
+        return $"Es la brocha de tamanno {Size}?";
+    }
+    public object VisitIsCanvasColorStmt(IsCanvasColorStmt isCanvasColorNode)
+    {
+        var Color = (string)SafeEvaluate(isCanvasColorNode.Color);
+        var Vertical = (int)SafeEvaluate(isCanvasColorNode.Vertical);
+        var Horizontal = (int)SafeEvaluate(isCanvasColorNode.Horizontal);
+
+        return $"Es la casilla en {Vertical} y {Horizontal} {Color}?";
+    }
+    public object VisitGoToStmt(GoToStmt GoToNode) => string.Empty;
+
+
+    /// <summary>
+    /// Evalúa el árbol y traduce cualquier InvalidCastException en RuntimeError.
+    /// </summary>
+    private object SafeEvaluate(Expr expr)
+    {
+        try
+        {
+            return expr.Accept(this);
+        }
+        catch (InvalidCastException)
+        {
+            Token token = ExtractToken(expr);
+            throw new RuntimeError(token, "Operación con tipos inválidos.");
+        }
+    }
+
+    private Token ExtractToken(Expr expr)
+    {
+        switch (expr)
+        {
+            case Binary b: return b.Operator;
+            case Unary u: return u.Operator;
+            case Grouping g: return ExtractToken(g.Expression);
+            case Identifier i: return i.Name;
+            default: return new Token(TokenType.None, "", 0, 0);
+        }
+    }
     private void CheckNumberOperand(Token operatorToken, object operand)
     {
         if (!(operand is int))
@@ -235,18 +330,24 @@ using System.Collections.Generic;
         }
         hadRuntimeError = true;
     }
-    
-        private bool IsTruthy(object obj)
+
+    private bool IsTruthy(object obj)
     {
         if (obj == null) return false;
         if (obj is bool b) return b;
         // Otros tipos (números, strings, etc.) siempre "verdaderos"
         return true;
     }
-
+    private void CheckValidDirection(Token operatorToken, int X, int Y)
+    {
+        if (!(X == 1 || X == -1) || !(Y == 1 || Y == -1))
+        {
+            throw new RuntimeError(operatorToken, "Direccion invalida");
+        }     
+    }
 }
 
-*/
+
 public class RuntimeError : Exception
 {
     public Token Token { get; }

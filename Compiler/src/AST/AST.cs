@@ -75,7 +75,7 @@ public class AstTreePrinter : IVisitor<string>
                 children.Add(colorStmt.Color);
                 break;
             case SizeStmt sizeStmt:
-                children.Add(sizeStmt.Expr);
+                children.Add(sizeStmt.Size);
                 break;
             case DrawLineStmt drawLineStmt:
                 children.Add(drawLineStmt.DirX);
@@ -134,7 +134,7 @@ public class AstTreePrinter : IVisitor<string>
             ExpressionStmt _ => "ExpressionStmt",
             Binary b => $"Binary({b.Operator.Lexeme})",
             Grouping _ => "Grouping",
-            Literal l => $"Literal({l.Value ?? "nil"})",
+            Literal l => $"Literal({l.Value})",
             Unary u => $"Unary({u.Operator.Lexeme})",
             Logical lo => $"Logical({lo.Operator.Lexeme})",
             Assign a => $"Assign({a.Name.Lexeme})",

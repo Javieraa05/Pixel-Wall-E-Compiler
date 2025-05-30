@@ -5,12 +5,15 @@ class Program
     static void Main(string[] args)
     {
         //ProbarInterprete();
-        string source = @"Spawn(4,5)
-                          GoTo [Hi] (7<8)";   
+        string source = @"Spawn(3,5)
+                        Color(Black)
+                        Size(4)
+                        DrawLine(1,1,5)
+                        DrawCircle(1,1,6)";
 
         // Paso 1: Analizar léxicamente el código fuente
         Lexer lexer = new Lexer(source);
-        List<Token> tokens = lexer.Lex();   
+        List<Token> tokens = lexer.Lex();
         foreach (Token token in tokens)
         {
             Console.WriteLine(token.ToString());
@@ -27,15 +30,16 @@ class Program
         // Paso 3: Imprimir el árbol sintáctico (AST)
         AstTreePrinter printer = new AstTreePrinter();
         Console.WriteLine(printer.Print(program));
-        
 
-        /*// Paso 4: Interpretar el AST
+
+        // Paso 4: Interpretar el AST
         Interpreter interpreter = new Interpreter();
-        interpreter.Interpret(expression);
+        interpreter.VisitProgramNode(program);
+        
         // Salida: 14
 
-        // Paso 5: Analisis de errores*/
-        
+        // Paso 5: Analisis de errores
+
     }
 
 }

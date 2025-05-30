@@ -42,10 +42,13 @@ public class SpawnStmt : Stmt
 
 public class ColorStmt : Stmt
 {
+    public Token Keyword;
+
     public Expr Color;
 
-    public ColorStmt(Expr color)
+    public ColorStmt(Token keyword, Expr color)
     {
+        Keyword = keyword;
         Color = color;
     }
 
@@ -57,11 +60,13 @@ public class ColorStmt : Stmt
 
 public class SizeStmt : Stmt
 {
-    public Expr Expr;
+    public Token Keyword;
+    public Expr Size;
 
-    public SizeStmt(Expr expr)
+    public SizeStmt(Token keyword, Expr expr)
     {
-        Expr = expr;
+        Keyword = keyword;
+        Size = expr;
     }
 
     public override T Accept<T>(IVisitor<T> visitor)
@@ -71,12 +76,14 @@ public class SizeStmt : Stmt
 }
 public class DrawLineStmt : Stmt
 {
+    public Token Keyword;
     public Expr DirX;
     public Expr DirY;
     public Expr Distance;
 
-    public DrawLineStmt(Expr dirX, Expr dirY, Expr distance)
+    public DrawLineStmt(Token keyword, Expr dirX, Expr dirY, Expr distance)
     {
+        Keyword = keyword;
         DirX = dirX;
         DirY = dirY;
         Distance = distance;
@@ -89,12 +96,14 @@ public class DrawLineStmt : Stmt
 }
 public class DrawCircleStmt : Stmt
 {
+    public Token Keyword;
     public Expr DirX;
     public Expr DirY;
     public Expr Radius;
 
-    public DrawCircleStmt(Expr dirX, Expr dirY, Expr radius)
+    public DrawCircleStmt(Token keyword, Expr dirX, Expr dirY, Expr radius)
     {
+        Keyword = keyword;
         DirX = dirX;
         DirY = dirY;
         Radius = radius;
@@ -107,38 +116,39 @@ public class DrawCircleStmt : Stmt
 }
 
 public class DrawRectangleStmt : Stmt
+{
+    public Token Keyword;
+    public Expr DirX;
+    public Expr DirY;
+    public Expr Distance;
+    public Expr Width;
+    public Expr Height;
+
+    public DrawRectangleStmt(Token keyword, Expr dirX, Expr dirY, Expr distance, Expr width, Expr height)
     {
-        public Expr DirX;
-        public Expr DirY;
-        public Expr Distance;
-        public Expr Width;
-        public Expr Height;
-
-        public DrawRectangleStmt(Expr dirX, Expr dirY, Expr distance, Expr width, Expr height)
-        {
-            DirX = dirX;
-            DirY = dirY;
-            Distance = distance;
-            Width = width;
-            Height = height;
-        }
-
-        public override T Accept<T>(IVisitor<T> visitor)
-        {
-            return visitor.VisitDrawRectangleStmt(this);
-        }
+        Keyword = keyword;
+        DirX = dirX;
+        DirY = dirY;
+        Distance = distance;
+        Width = width;
+        Height = height;
     }
+
+    public override T Accept<T>(IVisitor<T> visitor)
+    {
+        return visitor.VisitDrawRectangleStmt(this);
+    }
+}
 
 public class FillStmt : Stmt
 {
-            public FillStmt()
-            {
-            }
+    public FillStmt()
+    {}
 
-            public override T Accept<T>(IVisitor<T> visitor)
-            {
-                return visitor.VisitFillStmt(this);
-            }
+    public override T Accept<T>(IVisitor<T> visitor)
+    {
+        return visitor.VisitFillStmt(this);
+    }
 }
 
 public class GetActualXStmt : Stmt
@@ -173,14 +183,16 @@ public class GetCanvasSizeStmt : Stmt
 
 public class GetColorCountStmt : Stmt
 {
+    public Token Keyword;
     public Expr Color { get; }
     public Expr X1 { get; }
     public Expr Y1 { get; }
     public Expr X2 { get; }
     public Expr Y2 { get; }
 
-    public GetColorCountStmt(Expr color, Expr x1, Expr y1, Expr x2, Expr y2)
+    public GetColorCountStmt(Token keyword, Expr color, Expr x1, Expr y1, Expr x2, Expr y2)
     {
+        Keyword = keyword;
         Color = color;
         X1 = x1;
         Y1 = y1;
@@ -196,10 +208,12 @@ public class GetColorCountStmt : Stmt
 
 public class IsBrushColorStmt : Stmt
 {
+    public Token Keyword;
     public Expr Color { get; }
 
-    public IsBrushColorStmt(Expr color)
+    public IsBrushColorStmt(Token keyword, Expr color)
     {
+        Keyword = keyword;
         Color = color;
     }
 
@@ -211,10 +225,12 @@ public class IsBrushColorStmt : Stmt
 
 public class IsBrushSizeStmt : Stmt
 {
+    public Token Keyword;
     public Expr Size { get; }
 
-    public IsBrushSizeStmt(Expr size)
+    public IsBrushSizeStmt(Token keyword, Expr size)
     {
+        Keyword = keyword;
         Size = size;
     }
 
@@ -226,12 +242,14 @@ public class IsBrushSizeStmt : Stmt
 
 public class IsCanvasColorStmt : Stmt
 {
+    public Token Keyword;
     public Expr Color { get; }
     public Expr Vertical { get; }
     public Expr Horizontal { get; }
 
-    public IsCanvasColorStmt(Expr color, Expr vertical, Expr horizontal)
+    public IsCanvasColorStmt(Token keyword, Expr color, Expr vertical, Expr horizontal)
     {
+        Keyword = keyword;
         Color = color;
         Vertical = vertical;
         Horizontal = horizontal;
@@ -244,12 +262,14 @@ public class IsCanvasColorStmt : Stmt
 }
 
 public class GoToStmt : Stmt
-{
+{   
+    public Token Keyword;
     public Expr Label;
     public Expr Condition;
 
-    public GoToStmt(Expr label, Expr condition)
+    public GoToStmt(Token keyword, Expr label, Expr condition)
     {
+        Keyword = keyword;
         Label = label;
         Condition = condition;
     }
