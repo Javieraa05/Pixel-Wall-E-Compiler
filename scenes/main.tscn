@@ -64,7 +64,7 @@ text = "Save"
 layout_mode = 2
 min_value = 2.0
 max_value = 256.0
-value = 2.0
+value = 32.0
 
 [node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/EditContainer"]
 layout_mode = 2

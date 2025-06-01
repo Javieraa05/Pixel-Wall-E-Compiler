@@ -1,12 +1,13 @@
 using Godot;
 using System;
-
+using Wall_E.Compiler;
+using System.Collections.Generic;
 public partial class Main : Control
 {
     // Botones
     private Button runButton;
     private Button loadButton;
-    private Button saveButton;
+    private Button saveButton;  
     
     // Nodo del editor de código
     private CodeEdit codeEdit;
@@ -29,6 +30,14 @@ public partial class Main : Control
 
     // Almacena el número actual de divisiones de la cuadrícula
     private int currentGridDivisions = 32;
+
+    Lexer lexer;
+    List<Token> tokens;
+    Parser parser;
+    List<Stmt> statements;
+    ProgramNode programNode;
+    Interpreter interpreter;
+
 
     public override void _Ready()
     {
@@ -67,6 +76,9 @@ public partial class Main : Control
         fileDialogLoad.Filters = new string[] { "*.gw" };
         AddChild(fileDialogLoad);
         fileDialogLoad.Connect("file_selected", new Callable(this, nameof(_OnFileDialogLoadFileSelected)));
+
+       
+
     }
 
     private void OnSaveButtonPressed()
@@ -90,8 +102,49 @@ public partial class Main : Control
     private void OnRunButtonPressed()
     {
         GD.Print("Correr Código");
+        string codigo = @codeEdit.GetText();
+        if (string.IsNullOrEmpty(codigo))
+        {
+            GD.Print("El código está vacío. Por favor, escribe algo antes de correr.");
+            return;
+        }
+        GD.Print("Ejecutando código: " + codigo);
+        // Inicializar el lexer, parser e intérprete
+        lexer = new Lexer(codigo);
+        tokens = lexer.Lex();
+
+        parser = new Parser(tokens);
+        statements = parser.Parse();
+
+        programNode = new ProgramNode();
+        programNode.Statements.AddRange(statements);
+
+        interpreter = new Interpreter(currentGridDivisions);
+        interpreter.Interpret(programNode);
+        GD.Print("Código ejecutado correctamente.");
+        // Limpiar el canvas antes de pintar
+        canvasImage.Fill(Colors.White);
+        canvasTexture.Update(canvasImage);
+        // Pintar el canvas con los resultados de la interpretación
+        Print(interpreter.Canvas);
+        GD.Print("Canvas actualizado con los resultados de la interpretación.");
+
     }
 
+    private void Print(Canvas canvas)
+    {
+        Pixel[,] pixels = canvas.GetPixels();
+
+        for (int x = 0; x < currentGridDivisions; x++)
+        {
+            for (int y = 0; y < currentGridDivisions; y++)
+            {
+                string color = pixels[x,y].ToString();
+                GD.Print($"Pintando celda ({x}, {y}) con color: {color}");
+                PintarCelda(y, x, new Color(color));
+            }
+        }
+    }
     private void _OnFileDialogSaveFileSelected(string ruta)
     {
         GuardarArchivo(ruta);
@@ -144,7 +197,7 @@ public partial class Main : Control
     // Función para guardar el contenido del editor en un archivo
     private void GuardarArchivo(string ruta)
     {
-        var archivo = FileAccess.Open(ruta, FileAccess.ModeFlags.Write);
+        var archivo = Godot.FileAccess.Open(ruta, Godot.FileAccess.ModeFlags.Write);
         archivo.StoreString(codeEdit.GetText());
         archivo.Close();
     }
@@ -152,7 +205,7 @@ public partial class Main : Control
     // Función para cargar el contenido de un archivo en el editor
     private void CargarArchivo(string ruta)
     {
-        var archivo = FileAccess.Open(ruta, FileAccess.ModeFlags.Read);
+        var archivo = Godot.FileAccess.Open(ruta, Godot.FileAccess.ModeFlags.Read);
         string contenido = archivo.GetAsText();
         archivo.Close();
         codeEdit.SetText(contenido);
