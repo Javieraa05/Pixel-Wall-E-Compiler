@@ -24,7 +24,7 @@ namespace Wall_E.Compiler
         public object Get(Token id)
         {
             if (values.TryGetValue(id.Lexeme, out var val)) return val;
-            throw new RuntimeError(id,
+            throw new RuntimeError(id.Line, id.Column,
                 $"Variable '{id.Lexeme}' no definida.");
         }
 

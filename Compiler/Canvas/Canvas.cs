@@ -60,6 +60,14 @@ namespace Wall_E.Compiler
             ValidateCoords(x, y);
             pixels[y, x].Color = color;
         }
+        public int GetWallEPosX()
+        {
+            return Wall_E.PosX;
+        }
+        public int GetWallEPosY()
+        {
+            return Wall_E.PosY;
+        }
 
         private void ValidateCoords(int x, int y)
         {
@@ -75,22 +83,6 @@ namespace Wall_E.Compiler
             ValidateCoords(x, y);
             Wall_E.MoveTo(x, y);
             PrintCanvas();
-        }
-
-        /// <summary>
-        /// Cambia el color de la brocha de Wall-E.
-        /// </summary>
-        public void SetColor(string color)
-        {
-            Wall_E.SetBrushColor(color);
-        }
-
-        /// <summary>
-        /// Cambia el tamaño de la brocha de Wall-E.
-        /// </summary>
-        public void SetSize(int size)
-        {
-            Wall_E.SetBrushSize(size);
         }
 
         /// <summary>
@@ -126,7 +118,7 @@ namespace Wall_E.Compiler
                 PaintAt(x, y, Wall_E.BrushSize, Wall_E.BrushColor);
             }
 
-            ValidateCoords(y, x);
+            ValidateCoords(x, y);
             Wall_E.MoveTo(x, y);
             PrintCanvas();
         }
@@ -140,14 +132,16 @@ namespace Wall_E.Compiler
         {
             if (radius < 0) throw new InvalidOperationException("Radius debe ser >= 0");
 
-            // Centro del círculo = posición actual de Wall-E + (dirX, dirY)
-            int centerX = Wall_E.PosX + dirX;
-            int centerY = Wall_E.PosY + dirY;
-            ValidateCoords(centerX, centerY);
+            var color = Wall_E.BrushColor;
+            SetColor("Transparent");
+            DrawLine(dirX, dirY, radius);
+            SetColor(color);
+
+
 
             // Usamos el algoritmo de Bresenham para círculo o aproximación:
-            int x0 = centerX;
-            int y0 = centerY;
+            int x0 = Wall_E.PosX;
+            int y0 = Wall_E.PosY;
             int r = radius;
 
             int x = r;
@@ -165,7 +159,6 @@ namespace Wall_E.Compiler
                     err += 1 - 2 * x;
                 }
             }
-            Wall_E.MoveTo(centerX, centerY);
             PrintCanvas();
         }
 
@@ -274,6 +267,22 @@ namespace Wall_E.Compiler
         {
             return x >= 0 && x < Size && y >= 0 && y < Size;
         }
+        /// <summary>
+        /// Cambia el color de la brocha de Wall-E.
+        /// </summary>
+        public void SetColor(string color)
+        {
+            Wall_E.SetBrushColor(color);
+        }
+
+        /// <summary>
+        /// Cambia el tamaño de la brocha de Wall-E.
+        /// </summary>
+        public void SetSize(int size)
+        {
+            Wall_E.SetBrushSize(size);
+        }
+
 
     }
 
@@ -318,5 +327,6 @@ namespace Wall_E.Compiler
             PosX = x;
             PosY = y;
         }
+        
     }
 }

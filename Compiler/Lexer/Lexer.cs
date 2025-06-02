@@ -4,13 +4,6 @@ using System.Globalization;
 
 namespace Wall_E.Compiler
 {
-    // Excepción específica para errores léxicos
-    public class LexicalException : Exception
-    {
-        public LexicalException(string message) : base(message) { }
-    }
-
-
     // Lexer: realiza el análisis léxico transformando el código fuente en una lista de tokens.
     public class Lexer
     {
@@ -131,7 +124,7 @@ namespace Wall_E.Compiler
                             Advance(); Advance();
                             tokens.Add(new Token(TokenType.And, "&&", startLine, startCol));
                         }
-                        else throw new LexicalException($"Carácter inesperado '&' en línea {_line}, columna {_column}");
+                        else throw new LexicalException($"Carácter inesperado '&'", _line, _column);
                         break;
 
                     case '|':
@@ -140,7 +133,7 @@ namespace Wall_E.Compiler
                             Advance(); Advance();
                             tokens.Add(new Token(TokenType.Or, "||", startLine, startCol));
                         }
-                        else throw new LexicalException($"Carácter inesperado '|' en línea {_line}, columna {_column}");
+                        else throw new LexicalException($"Carácter inesperado '|'",_line, _column);
                         break;
 
                     case '=':
@@ -149,7 +142,7 @@ namespace Wall_E.Compiler
                             Advance(); Advance();
                             tokens.Add(new Token(TokenType.EqualEqual, "==", startLine, startCol));
                         }
-                        else throw new LexicalException($"Carácter inesperado '=' en línea {_line}, columna {_column}");
+                        else throw new LexicalException($"Carácter inesperado '='", _line, _column);
                         break;
 
                     case '>':
@@ -213,7 +206,7 @@ namespace Wall_E.Compiler
                         break;
 
                     default:
-                        throw new LexicalException($"Carácter inesperado '{Current}' en línea {_line}, columna {_column}");
+                        throw new LexicalException($"Carácter inesperado '{Current}'",_line, _column);
                 }
             }
 
@@ -282,7 +275,7 @@ namespace Wall_E.Compiler
             while (Current != '"' && Current != '\0')
                 Advance();
             if (Current != '"')
-                throw new LexicalException($"Cadena sin cerrar iniciada en línea {startLine}, columna {startCol}");
+                throw new LexicalException($"Cadena sin cerrar",startLine, startCol);
             string str = _source[start.._position];
             Advance(); // omite la comilla final
             return str;
@@ -295,6 +288,19 @@ namespace Wall_E.Compiler
                 || (c >= 'a' && c <= 'z')
                 || c == 'Ñ'
                 || c == 'ñ';
+        }
+    }
+    // Excepción específica para errores léxicos
+    public class LexicalException : Exception
+    {   
+        public string Message { get; }
+        public int Line { get; }
+        public int Column { get; }
+        public LexicalException(string message, int line, int column)
+        { 
+            Message = message;
+            Line = line;
+            Column = column;
         }
     }
 }

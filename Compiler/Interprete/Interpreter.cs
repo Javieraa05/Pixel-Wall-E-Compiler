@@ -7,9 +7,15 @@ namespace Wall_E.Compiler
     public class Interpreter : IExprVisitor<object>, IStmtVisitor<object>
     {
         // Flag para código de salida
-        public static bool hadRuntimeError = false;
+        public bool hadRuntimeError = false;
         private readonly Environment env = new Environment();
         Canvas canvas;
+
+        // Lista para acumular errores en tiempo de ejecución
+        private readonly List<RuntimeError> runtimeErrors = new List<RuntimeError>();
+
+        // Lista de instrucciones gráficas que deben enviarse a Godot (en orden)
+        private readonly List<Instruction> instructions = new List<Instruction>();
 
         public Interpreter(int sizeCanvas)
         {
@@ -24,7 +30,6 @@ namespace Wall_E.Compiler
         /// </summary>
         public void Interpret(ProgramNode programNode)
         {
-            // Reiniciar flags antes de cada ejecución
             hadRuntimeError = false;
             try
             {
@@ -32,22 +37,233 @@ namespace Wall_E.Compiler
             }
             catch (RuntimeError error)
             {
-                ReportRuntimeError(error);
+                // Si llega aquí, agregamos a la lista (aunque idealmente cada Visit protegerá sus propias llamadas)
+                runtimeErrors.Add(error);
             }
         }
+        /// <summary>
+        /// Acceso desde Core para obtener todos los errores de runtime
+        /// </summary>
+        public List<RuntimeError> RuntimeErrors => runtimeErrors;
+
+        /// <summary>
+        /// Lista de instrucciones a animar en Godot
+        /// </summary>
+        public List<Instruction> Instructions => instructions;
+
+        /// <summary>
+        /// El canvas interno, desde el que luego sacamos la matriz de píxeles
+        /// </summary>
+        public Canvas Canvas => canvas;
+
         // Método que inicia la interpretación de un programa completo:
         public object VisitProgramNode(ProgramNode program)
         {
             object last = null;
             foreach (var stmt in program.Statements)
             {
-                last = stmt.Accept(this);
-                Console.WriteLine(Stringify(last));
+                try
+                {
+                    last = stmt.Accept(this);
+                }
+                catch (RuntimeError rte)
+                {
+                    // Capturamos cualquier RuntimeError para seguir interpretando
+                    runtimeErrors.Add(rte);
+                    hadRuntimeError = true;
+                }
             }
             return last;
         }
 
-        public object VisitIdentifier(Identifier id)
+        public object VisitSpawnStmt(SpawnStmt spawnStmt)
+        {
+            var X = (int)SafeEvaluate(spawnStmt.ExprX);
+            var Y = (int)SafeEvaluate(spawnStmt.ExprY);
+
+            try
+            {
+                canvas.SpawnWallE(X, Y);
+                // Agregamos instrucción
+                instructions.Add(new Instruction(
+                    InstructionType.Spawn,
+                    X, Y
+                ));
+            }
+            catch (RuntimeError rte)
+            {
+                runtimeErrors.Add(rte);
+                hadRuntimeError = true;
+            }
+
+            return null;
+        }
+
+        public object VisitColorStmt(ColorStmt colorStmt)
+        {
+            var color = (string)SafeEvaluate(colorStmt.Color);
+            try
+            {
+                canvas.SetColor(color);
+                instructions.Add(new Instruction(
+                    InstructionType.SetColor,
+                    color
+                ));
+            }
+            catch (RuntimeError rte)
+            {
+                runtimeErrors.Add(rte);
+                hadRuntimeError = true;
+            }
+
+            return null;
+        }
+        public object VisitSizeStmt(SizeStmt sizeStmt)
+        {
+            var size = (int)SafeEvaluate(sizeStmt.Size);
+            try
+            {
+                canvas.SetSize(size);
+                instructions.Add(new Instruction(
+                    InstructionType.SetSize,
+                    size
+                ));
+            }
+            catch (RuntimeError rte)
+            {
+                runtimeErrors.Add(rte);
+                hadRuntimeError = true;
+            }
+            return null;
+        }
+        public object VisitDrawLineStmt(DrawLineStmt drawLineStmt)
+        {
+            var dirX = (int) SafeEvaluate(drawLineStmt.DirX);
+            var dirY = (int) SafeEvaluate(drawLineStmt.DirY);
+            var distance = (int) SafeEvaluate(drawLineStmt.Distance);
+            CheckValidDirection(drawLineStmt.Keyword, dirX, dirY);
+
+            try
+            {
+                canvas.DrawLine(dirX, dirY, distance);
+                instructions.Add(new Instruction(
+                    InstructionType.DrawLine,
+                    dirX, dirY, distance
+                ));
+            }
+            catch (RuntimeError rte)
+            {
+                runtimeErrors.Add(rte);
+                hadRuntimeError = true;
+            }
+
+            return null;
+
+        }
+        public object VisitDrawCircleStmt(DrawCircleStmt drawCircleStmt)
+        {
+             var dirX = (int)SafeEvaluate(drawCircleStmt.DirX);
+            var dirY = (int)SafeEvaluate(drawCircleStmt.DirY);
+            var radius = (int)SafeEvaluate(drawCircleStmt.Radius);
+            CheckValidDirection(drawCircleStmt.Keyword, dirX, dirY);
+
+            try
+            {
+                canvas.DrawCircle(dirX, dirY, radius);
+                instructions.Add(new Instruction(
+                    InstructionType.DrawCircle,
+                    dirX, dirY, radius
+                ));
+            }
+            catch (RuntimeError rte)
+            {
+                runtimeErrors.Add(rte);
+                hadRuntimeError = true;
+            }
+
+            return null;
+        }
+        public object VisitDrawRectangleStmt(DrawRectangleStmt drawRectangleStmt)
+        {
+             var dirX = (int)SafeEvaluate(drawRectangleStmt.DirX);
+            var dirY = (int)SafeEvaluate(drawRectangleStmt.DirY);
+            var width = (int)SafeEvaluate(drawRectangleStmt.Width);
+            var height = (int)SafeEvaluate(drawRectangleStmt.Height);
+            // (El parámetro Distance en tu AST parecía redundante; aquí asumimos solo ancho/alto)
+            CheckValidDirection(drawRectangleStmt.Keyword, dirX, dirY);
+
+            try
+            {
+                // Si quisieras mover a Wall-E antes de dibujar, agrega canvas.MoveTo(...) aquí
+                canvas.DrawRectangle(dirX, dirY, width, height);
+                instructions.Add(new Instruction(
+                    InstructionType.DrawRectangle,
+                    dirX, dirY, width, height
+                ));
+            }
+            catch (RuntimeError rte)
+            {
+                runtimeErrors.Add(rte);
+                hadRuntimeError = true;
+            }
+
+            return null;
+
+        }
+        public object VisitFillStmt(FillStmt fillStmt)
+        {
+             try
+            {
+                canvas.Fill();
+                instructions.Add(new Instruction(
+                    InstructionType.Fill
+                ));
+            }
+            catch (RuntimeError rte)
+            {
+                runtimeErrors.Add(rte);
+                hadRuntimeError = true;
+            }
+            return null;
+        }
+        public object VisitGetActualXStmt(GetActualXStmt getActualXNode)
+        {
+            return canvas.GetWallEPosX();
+        }
+        public object VisitGetActualYStmt(GetActualYStmt getActualYNode)
+        {
+            return canvas.GetWallEPosY();
+        }
+        public object VisitGetCanvasSizeStmt(GetCanvasSizeStmt getCanvasSizeNode)
+        {
+            return canvas.GetPixels().GetLength(0);
+        }
+        public object VisitGetColorCountStmt(GetColorCountStmt getColorCountNode)
+        {
+            
+            return $"Cantidad de";
+        }
+        public object VisitIsBrushColorStmt(IsBrushColorStmt isBrushColorNode)
+        {
+            return canvas.GetPixelColor(
+                canvas.GetWallEPosX(),
+                canvas.GetWallEPosY()
+            ) == (string)SafeEvaluate(isBrushColorNode.Color);
+        }
+        public object VisitIsBrushSizeStmt(IsBrushSizeStmt isBrushSizeNode)
+        {
+           return canvas.GetWallEPosX() == (int)SafeEvaluate(isBrushSizeNode.Size);
+        }
+        public object VisitIsCanvasColorStmt(IsCanvasColorStmt isCanvasColorNode)
+        {
+            var color = (string)SafeEvaluate(isCanvasColorNode.Color);
+            var v = (int)SafeEvaluate(isCanvasColorNode.Vertical);
+            var h = (int)SafeEvaluate(isCanvasColorNode.Horizontal);
+            return canvas.GetPixelColor(h, v) == color;
+        }
+        public object VisitGoToStmt(GoToStmt GoToNode) => string.Empty;
+
+          public object VisitIdentifier(Identifier id)
         {
             // Recupera el valor de la variable
             return env.Get(id.Name);
@@ -113,7 +329,7 @@ namespace Wall_E.Compiler
 
                 default:
                     throw new RuntimeError(
-                        expr.Operator,
+                        expr.Operator.Line, expr.Operator.Column,
                         $"Operador no soportado '{expr.Operator.Lexeme}'."
                     );
             }
@@ -144,13 +360,13 @@ namespace Wall_E.Compiler
                 case TokenType.Modulo:
                     CheckNumberOperands(expr.Operator, left, right);
                     if ((int)right == 0)
-                        throw new RuntimeError(expr.Operator, "Módulo por cero.");
+                        throw new RuntimeError(expr.Operator.Line,expr.Operator.Column, "Módulo por cero.");
                     return (int)left % (int)right;
 
                 case TokenType.Slash:
                     CheckNumberOperands(expr.Operator, left, right);
                     if ((int)right == 0)
-                        throw new RuntimeError(expr.Operator, "División por cero.");
+                        throw new RuntimeError(expr.Operator.Line,expr.Operator.Column, "División por cero.");
                     return (int)left / (int)right;
 
                 case TokenType.Greater:
@@ -180,120 +396,11 @@ namespace Wall_E.Compiler
 
                 default:
                     throw new RuntimeError(
-                        expr.Operator,
+                        expr.Operator.Line,expr.Operator.Column,
                         $"Operador no soportado '{expr.Operator.Lexeme}'."
                     );
             }
         }
-
-        public object VisitSpawnStmt(SpawnStmt spawnStmt)
-        {
-            var X = (int)SafeEvaluate(spawnStmt.ExprX);
-            var Y = (int)SafeEvaluate(spawnStmt.ExprY);
-
-            canvas.SpawnWallE(X, Y);
-
-            return $"Wall-E comienza en ({X}, {Y}) ";
-        }
-
-        public object VisitColorStmt(ColorStmt colorStmt)
-        {
-            var Color = (string)SafeEvaluate(colorStmt.Color);
-
-            canvas.SetColor(Color);
-
-            return $"Brocha cambiada a {Color}";
-        }
-        public object VisitSizeStmt(SizeStmt sizeStmt)
-        {
-            var Size = (int)SafeEvaluate(sizeStmt.Size);
-
-            canvas.SetSize(Size);
-
-            return $"Tamanno de brocha cambiado a {Size}";
-        }
-        public object VisitDrawLineStmt(DrawLineStmt drawLineStmt)
-        {
-            var X = (int)SafeEvaluate(drawLineStmt.DirX);
-            var Y = (int)SafeEvaluate(drawLineStmt.DirY);
-            var Distance = (int)SafeEvaluate(drawLineStmt.Distance);
-            CheckValidDirection(drawLineStmt.Keyword, X, Y);
-
-            canvas.DrawLine(X, Y, Distance);
-
-            return $"Wall-E pinta linea en ({X}, {Y}) de distancia {Distance}";
-        }
-        public object VisitDrawCircleStmt(DrawCircleStmt drawCircleStmt)
-        {
-            var X = (int)SafeEvaluate(drawCircleStmt.DirX);
-            var Y = (int)SafeEvaluate(drawCircleStmt.DirY);
-            var Radius = (int)SafeEvaluate(drawCircleStmt.Radius);
-            CheckValidDirection(drawCircleStmt.Keyword, X, Y);
-
-            canvas.DrawCircle(X, Y, Radius);
-
-            return $"Wall-E pinta circulo en ({X}, {Y}) de radio {Radius}";
-        }
-        public object VisitDrawRectangleStmt(DrawRectangleStmt drawRectangleStmt)
-        {
-            var X = (int)SafeEvaluate(drawRectangleStmt.DirX);
-            var Y = (int)SafeEvaluate(drawRectangleStmt.DirY);
-            var Distance = (int)SafeEvaluate(drawRectangleStmt.Distance);
-            var Width = (int)SafeEvaluate(drawRectangleStmt.Width);
-            var Height = (int)SafeEvaluate(drawRectangleStmt.Height);
-
-            CheckValidDirection(drawRectangleStmt.Keyword, X, Y);
-
-            return $"Wall-E pinta rectangulo en ({X}, {Y}) a {Distance} de ancho {Width} y largo {Height}";
-
-        }
-        public object VisitFillStmt(FillStmt fillStmt)
-        {
-            return "Fill";
-        }
-        public object VisitGetActualXStmt(GetActualXStmt getActualXNode)
-        {
-            return "X actual";
-        }
-        public object VisitGetActualYStmt(GetActualYStmt getActualYNode)
-        {
-            return "Y actual";
-        }
-        public object VisitGetCanvasSizeStmt(GetCanvasSizeStmt getCanvasSizeNode)
-        {
-            return "Tamanno del canvas";
-        }
-        public object VisitGetColorCountStmt(GetColorCountStmt getColorCountNode)
-        {
-            var Color = (string)SafeEvaluate(getColorCountNode.Color);
-            var X1 = (int)SafeEvaluate(getColorCountNode.X1);
-            var Y1 = (int)SafeEvaluate(getColorCountNode.Y1);
-            var X2 = (int)SafeEvaluate(getColorCountNode.X2);
-            var Y2 = (int)SafeEvaluate(getColorCountNode.Y2);
-
-            return $"Cantidad de {Color} de ({X1}, {X2}) a ({X2},{Y2}) ";
-        }
-        public object VisitIsBrushColorStmt(IsBrushColorStmt isBrushColorNode)
-        {
-            var Color = (string)SafeEvaluate(isBrushColorNode.Color);
-            return $"Es la brocha {Color}?";
-        }
-        public object VisitIsBrushSizeStmt(IsBrushSizeStmt isBrushSizeNode)
-        {
-            var Size = (int)SafeEvaluate(isBrushSizeNode.Size);
-
-            return $"Es la brocha de tamanno {Size}?";
-        }
-        public object VisitIsCanvasColorStmt(IsCanvasColorStmt isCanvasColorNode)
-        {
-            var Color = (string)SafeEvaluate(isCanvasColorNode.Color);
-            var Vertical = (int)SafeEvaluate(isCanvasColorNode.Vertical);
-            var Horizontal = (int)SafeEvaluate(isCanvasColorNode.Horizontal);
-
-            return $"Es la casilla en {Vertical} y {Horizontal} {Color}?";
-        }
-        public object VisitGoToStmt(GoToStmt GoToNode) => string.Empty;
-
 
         /// <summary>
         /// Evalúa el árbol y traduce cualquier InvalidCastException en RuntimeError.
@@ -306,8 +413,18 @@ namespace Wall_E.Compiler
             }
             catch (InvalidCastException)
             {
-                Token token = ExtractToken(expr);
-                throw new RuntimeError(token, "Operación con tipos inválidos.");
+                Token t = ExtractToken(expr);
+                var rte = new RuntimeError(t.Line, t.Column, "Operación con tipos inválidos.");
+                runtimeErrors.Add(rte);
+                hadRuntimeError = true;
+                // Como no podemos devolver un int válido, relanzamos RuntimeError:
+                throw rte;
+            }
+            catch (RuntimeError rte)
+            {
+                hadRuntimeError = true;
+                // Relanzamos para que el VisitXXXStmt lo capture antes de castear:
+                throw;
             }
         }
 
@@ -325,29 +442,18 @@ namespace Wall_E.Compiler
         private void CheckNumberOperand(Token operatorToken, object operand)
         {
             if (!(operand is int))
-                throw new RuntimeError(operatorToken, "El operando debe ser un número.");
+                throw new RuntimeError(operatorToken.Line, operatorToken.Column, "El operando debe ser un número.");
         }
 
         private void CheckNumberOperands(Token operatorToken, object left, object right)
         {
             if (!(left is int) || !(right is int))
-                throw new RuntimeError(operatorToken, "Ambos operandos deben ser números.");
+                throw new RuntimeError(operatorToken.Line, operatorToken.Column, "Ambos operandos deben ser números.");
         }
 
         private string Stringify(object obj)
         {
             return obj == null ? "null" : obj.ToString();
-        }
-
-
-        private void ReportRuntimeError(RuntimeError error)
-        {
-            Console.Error.WriteLine($"{error.Message}\n[línea {error.Token.Line}]");
-            foreach (var t in error.CallStack)
-            {
-                Console.Error.WriteLine($"  at colum {t.Column} ('{t.Lexeme}')");
-            }
-            hadRuntimeError = true;
         }
 
         private bool IsTruthy(object obj)
@@ -361,25 +467,33 @@ namespace Wall_E.Compiler
         {
             if (!(X == 1 || X == -1 || X == 0) || !(Y == 1 || Y == -1 || Y == 0))
             {
-                throw new RuntimeError(operatorToken, "Direccion invalida");
+                throw new RuntimeError(operatorToken.Line, operatorToken.Column, "Direccion invalida");
             }
         }
-        public Canvas Canvas => canvas;
+        
+          public void ClearErrors()
+        {
+            runtimeErrors.Clear();
+            hadRuntimeError = false;
+        }
+
+        public void ClearInstructions()
+        {
+            instructions.Clear();
+        }
     }
 
 
     public class RuntimeError : Exception
     {
-        public Token Token { get; }
-        public List<Token> CallStack { get; } = new List<Token>();
-
-        public RuntimeError(Token token, string message)
+        public int Line { get; }
+        public int Column { get; }
+        
+        public RuntimeError(int line, int column, string message)
             : base(message)
         {
-            Token = token;
-            CallStack.Add(token);
+            Line = line;
+            Column = column;
         }
-
-        public void Push(Token token) => CallStack.Add(token);
     }
 }

@@ -31,13 +31,6 @@ public partial class Main : Control
     // Almacena el número actual de divisiones de la cuadrícula
     private int currentGridDivisions = 32;
 
-    Lexer lexer;
-    List<Token> tokens;
-    Parser parser;
-    List<Stmt> statements;
-    ProgramNode programNode;
-    Interpreter interpreter;
-
 
     public override void _Ready()
     {
@@ -101,33 +94,33 @@ public partial class Main : Control
 
     private void OnRunButtonPressed()
     {
-        GD.Print("Correr Código");
-        string codigo = @codeEdit.GetText();
-        if (string.IsNullOrEmpty(codigo))
+        string codigo = codeEdit.GetText();
+        var core = new Core();
+        RunResult resultado = core.Run(codigo, currentGridDivisions);
+
+        // 1) Si hay errores, los mostramos en pantalla (p. ej. en un Panel o Label):
+        if (resultado.Errors.Count > 0)
         {
-            GD.Print("El código está vacío. Por favor, escribe algo antes de correr.");
+            GD.Print($"{resultado.Errors.Count} Errores de compilación encontrados:");
+            foreach (var err in resultado.Errors)
+            {
+                GD.Print(err.ToString());
+            }
             return;
         }
-        GD.Print("Ejecutando código: " + codigo);
-        // Inicializar el lexer, parser e intérprete
-        lexer = new Lexer(codigo);
-        tokens = lexer.Lex();
 
-        parser = new Parser(tokens);
-        statements = parser.Parse();
+        // Si llegamos aquí, significa que no hay errores de compilación.
+        GD.Print("Código compilado correctamente. Ejecutando...");
 
-        programNode = new ProgramNode();
-        programNode.Statements.AddRange(statements);
+        // 2) No hay errores -> obtenemos la matriz de píxeles y la lista de instrucciones:
+        Canvas canvas = resultado.Canvas;
+        List<Instruction> instrucciones = resultado.Instructions;
 
-        interpreter = new Interpreter(currentGridDivisions);
-        interpreter.Interpret(programNode);
-        GD.Print("Código ejecutado correctamente.");
-        // Limpiar el canvas antes de pintar
+        // 3) Limpiamos el canvas antes de pintar:
         canvasImage.Fill(Colors.White);
         canvasTexture.Update(canvasImage);
-        // Pintar el canvas con los resultados de la interpretación
-        Print(interpreter.Canvas);
-        GD.Print("Canvas actualizado con los resultados de la interpretación.");
+        // Pintamos la matriz de píxeles en el canvas
+        Print(canvas);
 
     }
 
@@ -135,11 +128,26 @@ public partial class Main : Control
     {
         Pixel[,] pixels = canvas.GetPixels();
 
-        for (int x = 0; x < currentGridDivisions; x++)
+        for (int y = 0; y < currentGridDivisions; y++)
         {
-            for (int y = 0; y < currentGridDivisions; y++)
+            for (int x = 0; x < currentGridDivisions; x++)
             {
-                string color = pixels[x,y].ToString();
+                string color = pixels[y, x].ToString();
+
+                if (canvas.GetWallEPosX() == y && canvas.GetWallEPosY() == x)
+                {
+                    // Pintar Wall-E en la posición actual
+                    PintarCelda(y, x, new Color("#FFD700")); // Color dorado para Wall-E
+                    GD.Print($"Pintando Wall-E en la celda ({y}, {x})");
+                    continue;
+                }
+
+                if (color == "Transparent")
+                {
+                    GD.Print($"Celda ({x}, {y}) es transparente, no se pintará.");
+                    continue; // No pintar celdas transparentes
+                }
+
                 GD.Print($"Pintando celda ({x}, {y}) con color: {color}");
                 PintarCelda(y, x, new Color(color));
             }
@@ -159,6 +167,9 @@ public partial class Main : Control
 
     private void OnBoardSizeChanged(double newValue)
     {
+         // Limpiar el canvas antes de pintar
+        canvasImage.Fill(Colors.White);
+        canvasTexture.Update(canvasImage);
         int newSize = (int)newValue;
         currentGridDivisions = newSize;
         gridOverlay.SetGridDivisions(newSize);

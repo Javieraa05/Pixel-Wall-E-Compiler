@@ -8,7 +8,9 @@ namespace Wall_E.Compiler
     {
         private readonly List<Token> tokens;
         private int current = 0;
-        public static bool hadError = false;
+        public bool hadError = false;
+        private bool Spawned = false;
+        public List<ParseException> ParseErrors { get; } = new List<ParseException>();
 
         private static readonly Dictionary<TokenType, int> arity = new()
     {
@@ -38,18 +40,19 @@ namespace Wall_E.Compiler
         {
             List<Stmt> statements = new List<Stmt>();
 
-            statements.Add(ParseSpawnStmt());
-
             while (!IsAtEnd())
             {
                 try
                 {
                     statements.Add(Statement());
                 }
-                catch (ParseError)
+                catch (ParseException ex)
                 {
-                    Synchronize();
+                    // Capturar el error de parseo y agregarlo a la lista
+                    ParseErrors.Add(ex);
                     hadError = true;
+                    Synchronize();
+                    
                 }
             }
 
@@ -58,6 +61,16 @@ namespace Wall_E.Compiler
 
         private Stmt Statement()
         {
+            if (Match(TokenType.Spawn))
+            {
+                if (Spawned)
+                {
+                    throw Error(Previous(), "Solo se puede usar Spawn una vez.");
+                }
+                current --; // Reiniciar el índice de tokens para evitar problemas con el Spawn
+                Spawned = true;
+                return ParseSpawnStmt();
+            }
             if (Match(TokenType.Spawn, TokenType.Color, TokenType.Size,
                        TokenType.DrawLine, TokenType.DrawCircle, TokenType.DrawRectangle,
                        TokenType.Fill, TokenType.GetActualX, TokenType.GetActualY, TokenType.GetCanvasSize,
@@ -305,7 +318,7 @@ namespace Wall_E.Compiler
                 Token name = Previous();
                 return new Identifier(name);
             }
-            throw Error(Peek(), "Expected expression.");
+            throw Error(Peek(), $"{Previous().Lexeme} no es una expresión válida.");
         }
 
         // Métodos auxiliares
@@ -342,19 +355,12 @@ namespace Wall_E.Compiler
             throw Error(Peek(), message);
         }
 
-        private ParseError Error(Token token, string message)
+        private ParseException Error(Token token, string message)
         {
-            ReportError(token, message);
-            return new ParseError();
+            return new ParseException(message, token.Line, token.Column);
         }
 
-        private void ReportError(Token token, string message)
-        {
-            if (token.Type == TokenType.EOF)
-                Console.Error.WriteLine($"[line {token.Line}] Error at end: {message}");
-            else
-                Console.Error.WriteLine($"[line {token.Line}] Error at '{token.Lexeme}': {message}");
-        }
+       
 
         private void Synchronize()
         {
@@ -398,5 +404,18 @@ namespace Wall_E.Compiler
     }
 
     // Excepción usada para errores de parseo
-    public class ParseError : Exception { }
+    public class ParseException : Exception
+    {
+        public string Message { get; }
+        public int Line { get; }
+        public int Column { get; }
+        public ParseException(string message = "Error de parseo", int line = 0, int column = 0)
+        {
+            Message = message;
+            Line = line;
+            Column = column;
+        }       
+    }
+     
+    
 }
