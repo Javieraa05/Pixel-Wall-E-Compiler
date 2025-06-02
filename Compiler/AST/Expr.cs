@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 namespace Wall_E.Compiler
 {
     public abstract class Expr : ASTNode
@@ -110,5 +111,13 @@ namespace Wall_E.Compiler
             Right = right;
         }
         public override T Accept<T>(IExprVisitor<T> visitor) => visitor.VisitLogicalExpr(this);
+    }
+   
+    public class EmptyExpr : Expr
+    {
+        public override T Accept<T>(IExprVisitor<T> visitor)
+        {
+            return visitor.VisitEmptyExpr(this);
+        }
     }
 }

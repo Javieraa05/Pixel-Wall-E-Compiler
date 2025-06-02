@@ -204,6 +204,10 @@ namespace Wall_E.Compiler
                         tokens.Add(new Token(TokenType.EOL, "\\n", startLine, startCol));
                         Advance();
                         break;
+                    case '\r':
+                        tokens.Add(new Token(TokenType.EOL, "\\r", startLine, startCol));
+                        Advance();
+                        break;
 
                     default:
                         throw new LexicalException($"Carácter inesperado '{Current}'",_line, _column);

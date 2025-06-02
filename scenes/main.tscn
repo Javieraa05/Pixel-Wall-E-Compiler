@@ -2,14 +2,19 @@
 
 [ext_resource type="Script" path="res://scripts/Main.cs" id="1_l8jyc"]
 [ext_resource type="Script" path="res://scripts/GridOverlay.cs" id="3_6gu13"]
-[ext_resource type="Script" path="res://scripts/CodeEdit.cs" id="3_qhjx5"]
 
 [sub_resource type="Gradient" id="Gradient_dce2j"]
-offsets = PackedFloat32Array(0.103896, 1)
-colors = PackedColorArray(0.0431373, 0.247059, 0.403922, 1, 0.0471976, 0.0631616, 0.0766962, 1)
+offsets = PackedFloat32Array(0.792208)
+colors = PackedColorArray(0.133982, 0.163665, 0.574856, 1)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_6ueyk"]
 gradient = SubResource("Gradient_dce2j")
+
+[sub_resource type="CodeHighlighter" id="CodeHighlighter_rjj1l"]
+number_color = Color(1, 1, 1, 1)
+symbol_color = Color(1, 1, 1, 1)
+function_color = Color(5.58317e-06, 0, 0.981519, 1)
+member_variable_color = Color(0.233148, 0.457125, 1, 1)
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_3px2y"]
 
@@ -69,16 +74,15 @@ value = 32.0
 [node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/EditContainer"]
 layout_mode = 2
 theme_override_constants/margin_left = 50
-theme_override_constants/margin_top = 0
 theme_override_constants/margin_right = 50
-theme_override_constants/margin_bottom = 20
 
 [node name="CodeEdit" type="CodeEdit" parent="HBoxContainer/EditContainer/MarginContainer"]
-custom_minimum_size = Vector2(900, 900)
+custom_minimum_size = Vector2(900, 650)
 layout_mode = 2
 text = "Spawn(1,0)
 "
 minimap_draw = true
+syntax_highlighter = SubResource("CodeHighlighter_rjj1l")
 gutters_draw_breakpoints_gutter = true
 gutters_draw_bookmarks = true
 gutters_draw_executing_lines = true
@@ -86,7 +90,19 @@ gutters_draw_line_numbers = true
 gutters_zero_pad_line_numbers = true
 gutters_draw_fold_gutter = true
 code_completion_enabled = true
-script = ExtResource("3_qhjx5")
+auto_brace_completion_enabled = true
+auto_brace_completion_highlight_matching = true
+
+[node name="MarginContainer3" type="MarginContainer" parent="HBoxContainer/EditContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 5
+
+[node name="TextEdit" type="TextEdit" parent="HBoxContainer/EditContainer/MarginContainer3"]
+custom_minimum_size = Vector2(0, 245)
+layout_mode = 2
 
 [node name="DisplayContainer" type="Control" parent="HBoxContainer"]
 custom_minimum_size = Vector2(880, 0)
@@ -114,8 +130,8 @@ custom_minimum_size = Vector2(900, 900)
 anchors_preset = 0
 offset_left = -30.0
 offset_top = 56.0
-offset_right = 850.0
-offset_bottom = 936.0
+offset_right = 870.0
+offset_bottom = 956.0
 script = ExtResource("3_6gu13")
 
 [node name="FileDialog" type="FileDialog" parent="HBoxContainer/DisplayContainer"]

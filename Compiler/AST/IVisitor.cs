@@ -10,6 +10,7 @@ namespace Wall_E.Compiler
         T VisitIdentifier(Identifier id);
         T VisitAssignExpr(Assign expr);
         T VisitLogicalExpr(Logical expr);
+        T VisitEmptyExpr(EmptyExpr expr);
     }
 
     public interface IStmtVisitor<T>

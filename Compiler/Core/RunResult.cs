@@ -13,12 +13,14 @@ namespace Wall_E.Compiler
         public Canvas Canvas { get; }
         public List<ErrorInfo> Errors { get; }
         public List<Instruction> Instructions { get; }
+        public string AST { get; }
 
-        public RunResult(Canvas canvas, List<ErrorInfo> errors, List<Instruction> instructions)
+        public RunResult(Canvas canvas, List<ErrorInfo> errors, List<Instruction> instructions, string ast)
         {
             Canvas = canvas;
             Errors = errors;
             Instructions = instructions;
+            AST = ast;
         }
     }
 }

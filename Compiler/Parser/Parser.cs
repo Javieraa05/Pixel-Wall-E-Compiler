@@ -195,7 +195,7 @@ namespace Wall_E.Compiler
                 if (expr is Identifier id)
                     return new Assign(id.Name, value);
 
-                throw Error(op, "Invalid assignment target.");
+                throw Error(op, "Objetivo de asignación no válido.");
             }
 
             return expr;
@@ -317,6 +317,11 @@ namespace Wall_E.Compiler
             {
                 Token name = Previous();
                 return new Identifier(name);
+            }
+            if(Match(TokenType.EOL))
+            {
+                // Si encontramos un salto de línea, devolvemos una expresión vacía
+                return new EmptyExpr();
             }
             throw Error(Peek(), $"{Previous().Lexeme} no es una expresión válida.");
         }

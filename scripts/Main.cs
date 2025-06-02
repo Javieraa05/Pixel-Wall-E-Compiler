@@ -11,6 +11,7 @@ public partial class Main : Control
     
     // Nodo del editor de código
     private CodeEdit codeEdit;
+    private TextEdit textOut;
     
     // FileDialogs para guardar y cargar archivos
     private FileDialog fileDialogSave;
@@ -42,6 +43,7 @@ public partial class Main : Control
         loadButton = GetNode<Button>("HBoxContainer/EditContainer/MarginContainer2/ButtonContainer/Load");
         runButton = GetNode<Button>("HBoxContainer/EditContainer/MarginContainer2/ButtonContainer/Run");
         codeEdit = GetNode<CodeEdit>("HBoxContainer/EditContainer/MarginContainer/CodeEdit");
+        textOut = GetNode<TextEdit>("HBoxContainer/EditContainer/MarginContainer3/TextEdit");
 
         // Conectar señales de botones
         boardSizeSpinBox.ValueChanged += OnBoardSizeChanged;
@@ -94,6 +96,20 @@ public partial class Main : Control
 
     private void OnRunButtonPressed()
     {
+        GD.Print("Ejecutar Código");
+        string codigo = codeEdit.GetText();
+
+        GD.Print("Código a ejecutar: " + codigo);
+        
+        if (string.IsNullOrWhiteSpace(codigo))
+        {
+            PrintConsole("El código está vacío. Por favor, escribe algo antes de ejecutar.");
+            return;
+        }
+        Compiler(codigo);
+    }
+    private void Compiler(string message)
+    {
         string codigo = codeEdit.GetText();
         var core = new Core();
         RunResult resultado = core.Run(codigo, currentGridDivisions);
@@ -104,24 +120,23 @@ public partial class Main : Control
             GD.Print($"{resultado.Errors.Count} Errores de compilación encontrados:");
             foreach (var err in resultado.Errors)
             {
-                GD.Print(err.ToString());
+                PrintConsole(err.ToString());
             }
             return;
         }
 
         // Si llegamos aquí, significa que no hay errores de compilación.
         GD.Print("Código compilado correctamente. Ejecutando...");
-
+        GD.Print("AST");
+        GD.Print(resultado.AST);
         // 2) No hay errores -> obtenemos la matriz de píxeles y la lista de instrucciones:
         Canvas canvas = resultado.Canvas;
         List<Instruction> instrucciones = resultado.Instructions;
 
         // 3) Limpiamos el canvas antes de pintar:
-        canvasImage.Fill(Colors.White);
-        canvasTexture.Update(canvasImage);
+        Reset();
         // Pintamos la matriz de píxeles en el canvas
         Print(canvas);
-
     }
 
     private void Print(Canvas canvas)
@@ -148,10 +163,19 @@ public partial class Main : Control
                     continue; // No pintar celdas transparentes
                 }
 
-                GD.Print($"Pintando celda ({x}, {y}) con color: {color}");
                 PintarCelda(y, x, new Color(color));
             }
         }
+    }
+    private void PrintConsole(string message)
+    {
+        textOut.Text = message;
+    }
+    private void Reset()
+    {
+        canvasImage.Fill(Colors.White);
+        canvasTexture.Update(canvasImage);
+        textOut.Text = "";
     }
     private void _OnFileDialogSaveFileSelected(string ruta)
     {
@@ -167,9 +191,8 @@ public partial class Main : Control
 
     private void OnBoardSizeChanged(double newValue)
     {
-         // Limpiar el canvas antes de pintar
-        canvasImage.Fill(Colors.White);
-        canvasTexture.Update(canvasImage);
+        // Limpiar el canvas antes de pintar
+        Reset();
         int newSize = (int)newValue;
         currentGridDivisions = newSize;
         gridOverlay.SetGridDivisions(newSize);
@@ -216,6 +239,7 @@ public partial class Main : Control
     // Función para cargar el contenido de un archivo en el editor
     private void CargarArchivo(string ruta)
     {
+        Reset();
         var archivo = Godot.FileAccess.Open(ruta, Godot.FileAccess.ModeFlags.Read);
         string contenido = archivo.GetAsText();
         archivo.Close();

@@ -360,13 +360,13 @@ namespace Wall_E.Compiler
                 case TokenType.Modulo:
                     CheckNumberOperands(expr.Operator, left, right);
                     if ((int)right == 0)
-                        throw new RuntimeError(expr.Operator.Line,expr.Operator.Column, "Módulo por cero.");
+                        throw new RuntimeError(expr.Operator.Line, expr.Operator.Column, "Módulo por cero.");
                     return (int)left % (int)right;
 
                 case TokenType.Slash:
                     CheckNumberOperands(expr.Operator, left, right);
                     if ((int)right == 0)
-                        throw new RuntimeError(expr.Operator.Line,expr.Operator.Column, "División por cero.");
+                        throw new RuntimeError(expr.Operator.Line, expr.Operator.Column, "División por cero.");
                     return (int)left / (int)right;
 
                 case TokenType.Greater:
@@ -396,10 +396,16 @@ namespace Wall_E.Compiler
 
                 default:
                     throw new RuntimeError(
-                        expr.Operator.Line,expr.Operator.Column,
+                        expr.Operator.Line, expr.Operator.Column,
                         $"Operador no soportado '{expr.Operator.Lexeme}'."
                     );
             }
+            
+        }
+        public object VisitEmptyExpr(EmptyExpr expr)
+        {
+            // Expresión vacía, no hace nada
+            return null;
         }
 
         /// <summary>

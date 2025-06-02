@@ -14,6 +14,7 @@ namespace Wall_E.Compiler
             var errores = new List<ErrorInfo>();
             List<Token> tokens = null;
             ProgramNode program = null;
+            string AST = "";
 
             // 1) LEXER
             try
@@ -32,11 +33,20 @@ namespace Wall_E.Compiler
                 return new RunResult(
                     canvas: new Canvas(sizeCanvas),
                     errors: errores,
-                    instructions: new List<Instruction>()
+                    instructions: new List<Instruction>(),
+                    ""
                 );
             }
 
+            AST += "Tokens: \n";
+            foreach (var token in tokens)
+            {
+                AST += $"Type: {token.Type} ";
+                AST += $"Lexeme: {token.Lexeme} ";
+                AST += $"Line: {token.Line} ";
+                AST += $"Column: {token.Column} \n";
 
+            }
 
             // 2) PARSER
             List<Stmt> statements = null;
@@ -58,12 +68,14 @@ namespace Wall_E.Compiler
                 return new RunResult(
                     canvas: new Canvas(sizeCanvas),
                     errors: errores,
-                    instructions: new List<Instruction>()
+                    instructions: new List<Instruction>(),
+                    ""
                 );
             }
             program = new ProgramNode();
             program.Statements.AddRange(statements);
-            
+            AstTreePrinter astTreePrinter = new AstTreePrinter();
+            AST += "\n" + astTreePrinter.Print(program); 
 
 
             // 3) INTERPRETACIÓN
@@ -88,7 +100,8 @@ namespace Wall_E.Compiler
                 return new RunResult(
                     canvas: new Canvas(sizeCanvas),
                     errors: errores,
-                    instructions: new List<Instruction>()
+                    instructions: new List<Instruction>(),
+                    ""
                 );
             }
             
@@ -100,7 +113,8 @@ namespace Wall_E.Compiler
             return new RunResult(
             canvas: canvas,
             errors: errores,
-            instructions: instrucciones);
+            instructions: instrucciones,
+            AST);
         }
     }
 }
