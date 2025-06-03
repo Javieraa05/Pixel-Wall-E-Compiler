@@ -11,6 +11,10 @@ namespace Wall_E.Compiler
         private int _position;
         private int _line;
         private int _column;
+        
+        private List<LexicalException> _lexicalErrors = new List<LexicalException>();
+        public List<LexicalException> LexicalErrors => _lexicalErrors;
+        public bool HadError => _lexicalErrors.Count > 0;
 
         // Palabras reservadas, comparación case‑sensitive
         private static readonly Dictionary<string, TokenType> _keywords =
@@ -64,7 +68,7 @@ namespace Wall_E.Compiler
                 }
 
                 // Identificador o palabra reservada (debe empezar con letra española)
-                if (IsSpanishLetter(c))
+                if (IsSpanishLetter(c) || c == '_')
                 {
                     string word = ReadIdentifier();
                     if (_keywords.TryGetValue(word, out var kwType))
@@ -124,7 +128,11 @@ namespace Wall_E.Compiler
                             Advance(); Advance();
                             tokens.Add(new Token(TokenType.And, "&&", startLine, startCol));
                         }
-                        else throw new LexicalException($"Carácter inesperado '&'", _line, _column);
+                        else
+                        {
+                            _lexicalErrors.Add(new LexicalException($"Carácter inesperado '&'", _line, _column));
+                            Advance();
+                        }
                         break;
 
                     case '|':
@@ -133,7 +141,11 @@ namespace Wall_E.Compiler
                             Advance(); Advance();
                             tokens.Add(new Token(TokenType.Or, "||", startLine, startCol));
                         }
-                        else throw new LexicalException($"Carácter inesperado '|'",_line, _column);
+                        else
+                        {
+                            _lexicalErrors.Add(new LexicalException($"Carácter inesperado '|'", _line, _column));
+                            Advance();
+                        }
                         break;
 
                     case '=':
@@ -142,7 +154,11 @@ namespace Wall_E.Compiler
                             Advance(); Advance();
                             tokens.Add(new Token(TokenType.EqualEqual, "==", startLine, startCol));
                         }
-                        else throw new LexicalException($"Carácter inesperado '='", _line, _column);
+                        else
+                        {
+                            _lexicalErrors.Add( new LexicalException($"Carácter inesperado '='", _line, _column));
+                            Advance();
+                        }
                         break;
 
                     case '>':
@@ -210,7 +226,9 @@ namespace Wall_E.Compiler
                         break;
 
                     default:
-                        throw new LexicalException($"Carácter inesperado '{Current}'",_line, _column);
+                        _lexicalErrors.Add(new LexicalException($"Carácter inesperado '{Current}'",_line, _column));
+                        Advance();
+                        break;
                 }
             }
 
@@ -257,9 +275,16 @@ namespace Wall_E.Compiler
         private string ReadNumber()
         {
             int start = _position;
-            while (char.IsDigit(Current))
+            while (char.IsDigit(Current) || Current == '.' || IsSpanishLetter(Current) )
+            {
                 Advance();
-            return _source[start.._position];
+            }
+            string numStr = _source[start.._position];
+            if (!int.TryParse(numStr, NumberStyles.Float, CultureInfo.InvariantCulture, out _))
+            {
+                _lexicalErrors.Add(new LexicalException($"Número inválido: '{numStr}'", _line, _column));
+            }
+            return numStr;
         }
 
         private string ReadIdentifier()
@@ -267,7 +292,7 @@ namespace Wall_E.Compiler
             int start = _position;
             // Primer carácter ya validado como letra española
             Advance();
-            while (char.IsDigit(Current) || IsSpanishLetter(Current) || Current == '-')
+            while (char.IsDigit(Current) || IsSpanishLetter(Current) || Current == '_')
                 Advance();
             return _source[start.._position];
         }
@@ -276,10 +301,13 @@ namespace Wall_E.Compiler
         {
             Advance(); // omite la comilla inicial
             int start = _position;
-            while (Current != '"' && Current != '\0')
+            while (Current != '"' && Current != '\n' && Current != '\0')
                 Advance();
             if (Current != '"')
-                throw new LexicalException($"Cadena sin cerrar",startLine, startCol);
+            {
+                _lexicalErrors.Add(new LexicalException($"Cadena sin cerrar", startLine, startCol));
+                return string.Empty; // Devuelve cadena vacía si hay error
+            }
             string str = _source[start.._position];
             Advance(); // omite la comilla final
             return str;

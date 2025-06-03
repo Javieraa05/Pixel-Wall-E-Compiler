@@ -114,21 +114,24 @@ public partial class Main : Control
         var core = new Core();
         RunResult resultado = core.Run(codigo, currentGridDivisions);
 
+        GD.Print(resultado.AST);
+        
         // 1) Si hay errores, los mostramos en pantalla (p. ej. en un Panel o Label):
         if (resultado.Errors.Count > 0)
         {
             GD.Print($"{resultado.Errors.Count} Errores de compilación encontrados:");
+            string errorMessage = "";
             foreach (var err in resultado.Errors)
             {
-                PrintConsole(err.ToString());
+                errorMessage += err.ToString() + "\n";
             }
+            PrintConsole(errorMessage);
             return;
         }
 
         // Si llegamos aquí, significa que no hay errores de compilación.
         GD.Print("Código compilado correctamente. Ejecutando...");
-        GD.Print("AST");
-        GD.Print(resultado.AST);
+       
         // 2) No hay errores -> obtenemos la matriz de píxeles y la lista de instrucciones:
         Canvas canvas = resultado.Canvas;
         List<Instruction> instrucciones = resultado.Instructions;

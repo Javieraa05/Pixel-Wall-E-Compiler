@@ -11,6 +11,7 @@ namespace Wall_E.Compiler
         T VisitAssignExpr(Assign expr);
         T VisitLogicalExpr(Logical expr);
         T VisitEmptyExpr(EmptyExpr expr);
+        T VisitStringLiteralExpr(StringLiteral stringLiteral);
     }
 
     public interface IStmtVisitor<T>
@@ -32,6 +33,7 @@ namespace Wall_E.Compiler
         T VisitIsBrushSizeStmt(IsBrushSizeStmt isBrushSizeNode);
         T VisitIsCanvasColorStmt(IsCanvasColorStmt isCanvasColorNode);
         T VisitGoToStmt(GoToStmt GoToNode);
+        T VisitEmptyStmt(EmptyStmt emptyNode);
 
         // Métodos para nodos de Program
         T VisitProgramNode(ProgramNode program);

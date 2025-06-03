@@ -17,26 +17,31 @@ namespace Wall_E.Compiler
             string AST = "";
 
             // 1) LEXER
-            try
-            {
+           
                 var lexer = new Lexer(source);
                 tokens = lexer.Lex();
-            }
-            catch (LexicalException lexEx)
+
+            if (lexer.HadError)
             {
-                errores.Add(new ErrorInfo(
-                    ErrorKind.Lexical,
-                    line: lexEx.Line,
-                    column: lexEx.Column,
-                    message: lexEx.Message
-                ));
+                // Si el lexer tiene errores, los recogemos
+                foreach (var lexErr in lexer.LexicalErrors)
+                {
+                    errores.Add(new ErrorInfo(
+                        ErrorKind.Lexical,
+                        line: lexErr.Line,
+                        column: lexErr.Column,
+                        message: lexErr.Message
+                    ));
+                }
+
                 return new RunResult(
-                    canvas: new Canvas(sizeCanvas),
-                    errors: errores,
-                    instructions: new List<Instruction>(),
-                    ""
+                canvas: new Canvas(sizeCanvas),
+                errors: errores,
+                instructions: new List<Instruction>(),
+                ast: ""
                 );
             }
+            
 
             AST += "Tokens: \n";
             foreach (var token in tokens)
@@ -55,7 +60,7 @@ namespace Wall_E.Compiler
             if(parser.hadError)
             {
                 // Si el parser tiene errores, los recogemos
-                foreach (var parseErr in parser.ParseErrors)
+                foreach (var parseErr in parser._parseErrors)
                 {
                     errores.Add(new ErrorInfo(
                         ErrorKind.Syntactic,
@@ -69,9 +74,10 @@ namespace Wall_E.Compiler
                     canvas: new Canvas(sizeCanvas),
                     errors: errores,
                     instructions: new List<Instruction>(),
-                    ""
+                    ast: AST
                 );
             }
+            
             program = new ProgramNode();
             program.Statements.AddRange(statements);
             AstTreePrinter astTreePrinter = new AstTreePrinter();
@@ -101,7 +107,7 @@ namespace Wall_E.Compiler
                     canvas: new Canvas(sizeCanvas),
                     errors: errores,
                     instructions: new List<Instruction>(),
-                    ""
+                    ast: AST
                 );
             }
             

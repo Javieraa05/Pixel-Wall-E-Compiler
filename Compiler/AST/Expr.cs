@@ -55,6 +55,19 @@ namespace Wall_E.Compiler
             return visitor.VisitLiteralExpr(this);
         }
     }
+    public class StringLiteral : Expr
+    {
+        public string Value { get; }
+        public StringLiteral(string value)
+        {
+            Value = value;
+        }
+        public override T Accept<T>(IExprVisitor<T> visitor)
+        {
+            return visitor.VisitStringLiteralExpr(this);
+        }
+    }
+
 
     public class Unary : Expr
     {

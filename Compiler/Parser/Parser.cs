@@ -10,7 +10,7 @@ namespace Wall_E.Compiler
         private int current = 0;
         public bool hadError = false;
         private bool Spawned = false;
-        public List<ParseException> ParseErrors { get; } = new List<ParseException>();
+        public List<ParseException> _parseErrors { get; } = new List<ParseException>();
 
         private static readonly Dictionary<TokenType, int> arity = new()
     {
@@ -49,10 +49,10 @@ namespace Wall_E.Compiler
                 catch (ParseException ex)
                 {
                     // Capturar el error de parseo y agregarlo a la lista
-                    ParseErrors.Add(ex);
+                    _parseErrors.Add(ex);
                     hadError = true;
                     Synchronize();
-                    
+
                 }
             }
 
@@ -67,11 +67,13 @@ namespace Wall_E.Compiler
                 {
                     throw Error(Previous(), "Solo se puede usar Spawn una vez.");
                 }
-                current --; // Reiniciar el índice de tokens para evitar problemas con el Spawn
-                Spawned = true;
-                return ParseSpawnStmt();
+                else
+                {
+                    Spawned = true;
+                    return ParseSpawnStmt();
+                }
             }
-            if (Match(TokenType.Spawn, TokenType.Color, TokenType.Size,
+            if (Match(TokenType.Color, TokenType.Size,
                        TokenType.DrawLine, TokenType.DrawCircle, TokenType.DrawRectangle,
                        TokenType.Fill, TokenType.GetActualX, TokenType.GetActualY, TokenType.GetCanvasSize,
                        TokenType.GetColorCount, TokenType.IsBrushColor, TokenType.IsBrushSize,
@@ -79,22 +81,36 @@ namespace Wall_E.Compiler
             {
                 return CallStmt(Previous());
             }
-            else if (Match(TokenType.GoTo)) return ParseGoToStmt();
+            // 3) Si empieza con "GoTo"
+            if (Match(TokenType.GoTo))
+            {
+                Stmt gotoStmt = ParseGoToStmt();
+                return gotoStmt;
+            }
 
-            return ExpressionStatement();
+            Stmt exprStmt = ExpressionStatement();
+            return exprStmt;
+    
         }
 
         private Stmt ParseSpawnStmt()
         {
-            Token keyword = Consume(TokenType.Spawn, "Se esperaba Spawn");
+            Token keyword = Previous();
 
             Consume(TokenType.LeftParen, "Esperaba '(' después de 'Spawn'.");
 
             Expr x = Expression();
+
+            if (Check(TokenType.RightParen))
+            {
+                // Construimos un ParseException con mensaje más claro:
+                throw Error(Peek(), "Falta el segundo parámetro de Spawn.");
+            }
+
             Consume(TokenType.Comma, "Esperaba ',' entre los parámetros de Spawn.");
             Expr y = Expression();
 
-            Consume(TokenType.RightParen, "Esperaba ')' después de los parámetros de Spawn.");
+            Consume(TokenType.RightParen, "Esperaba ')' después de los parámetros de Spawn.");    
 
             if (Peek().Type is TokenType.EOF) return new SpawnStmt(keyword, x, y);
 
@@ -143,13 +159,11 @@ namespace Wall_E.Compiler
             int expected = arity[keyword.Type];
             if (args.Count != expected)
             {
-                throw Error(keyword,
-                    $"'{keyword.Lexeme}' espera {expected} argumentos, pero recibió {args.Count}.");
+                throw Error(keyword, $"'{keyword.Lexeme}' espera {expected} argumentos, pero recibió {args.Count}.");
             }
 
             // 5. Consumir EOL opcional
-            if (!IsAtEnd() && Peek().Type == TokenType.EOL)
-                Advance();
+            ConsumeEOLorEOF($"Esperaba un salto de línea después de '{Previous().Lexeme}'.");
 
             // 6. Construir el Stmt adecuado
             return keyword.Type switch
@@ -173,11 +187,8 @@ namespace Wall_E.Compiler
         }
         private Stmt ExpressionStatement()
         {
-            Expr expr = Expression();
-            if (IsAtEnd())
-                return new ExpressionStmt(expr);
-            // Si no es el final, se espera un salto de línea    
-            Consume(TokenType.EOL, "Esperaba un salto de línea después de la expresión.");
+            Expr expr = Expression();   
+            ConsumeEOLorEOF("Esperaba un salto de línea después de la expresión.");
             return new ExpressionStmt(expr);
         }
 
@@ -195,6 +206,7 @@ namespace Wall_E.Compiler
                 if (expr is Identifier id)
                     return new Assign(id.Name, value);
 
+                ConsumeEOLorEOF("Esperaba un salto de línea después de la asignación.");
                 throw Error(op, "Objetivo de asignación no válido.");
             }
 
@@ -256,6 +268,11 @@ namespace Wall_E.Compiler
             {
                 Token op = Previous();
                 Expr right = Factor();
+                if (right is EmptyExpr)
+                {
+                    // Si la expresión es EmptyExpr, no podemos aplicar Term
+                    throw Error(Peek(), "No se puede aplicar operacion a una expresión vacía.");
+                }
                 expr = new Binary(expr, op, right);
             }
             return expr;
@@ -276,6 +293,11 @@ namespace Wall_E.Compiler
         private Expr Power()
         {
             Expr expr = Unary();
+            if(expr is EmptyExpr)
+            {
+                // Si la expresión es EmptyExpr, no podemos aplicar Power
+                throw Error(Peek(), "No se puede aplicar operacion a una expresión vacía.");
+            }
             if (Match(TokenType.Power))
             {
                 Token op = Previous();
@@ -305,7 +327,7 @@ namespace Wall_E.Compiler
             }
             if (Match(TokenType.String))
             {
-                return new Identifier(Previous());
+                return new StringLiteral(Previous().Lexeme);
             }
             if (Match(TokenType.LeftParen))
             {
@@ -320,10 +342,12 @@ namespace Wall_E.Compiler
             }
             if(Match(TokenType.EOL))
             {
-                // Si encontramos un salto de línea, devolvemos una expresión vacía
+                // Si encontramos un EOL, lo ignoramos y devolvemos una expresión vacía
                 return new EmptyExpr();
             }
-            throw Error(Peek(), $"{Previous().Lexeme} no es una expresión válida.");
+
+            throw Error(Peek(), $"{Peek().Lexeme} no es una expresión válida.");
+
         }
 
         // Métodos auxiliares
@@ -365,46 +389,45 @@ namespace Wall_E.Compiler
             return new ParseException(message, token.Line, token.Column);
         }
 
-       
-
         private void Synchronize()
         {
             // Descartar el token que provocó el error
             Advance();
 
+
             while (!IsAtEnd())
             {
-                // Si vemos el inicio de una nueva instrucción o control,
-                // consideramos que ya estamos sincronizados
-                switch (Peek().Type)
+                if (Peek().Type == TokenType.EOL)
                 {
-                    // Instrucciones del lenguaje
-                    case TokenType.Spawn:
-                    case TokenType.Color:
-                    case TokenType.Size:
-                    case TokenType.DrawLine:
-                    case TokenType.DrawCircle:
-                    case TokenType.DrawRectangle:
-                    case TokenType.Fill:
-                    case TokenType.GetActualX:
-                    case TokenType.GetActualY:
-                    case TokenType.GetCanvasSize:
-                    case TokenType.GetColorCount:
-                    case TokenType.IsBrushColor:
-                    case TokenType.IsBrushSize:
-                    case TokenType.IsCanvasColor:
-
-                    // Declaración de variable
-                    case TokenType.Identifier:
-
-                    // Salto condicional
-                    case TokenType.GoTo:
-
-                        return;
+                    Advance();
+                    break;
                 }
                 Advance();
             }
+
         }
+        /// <summary>
+        /// Verifica que el token actual sea EOL; si es así, lo consume. 
+        /// Si es EOF, también se da por válido. 
+        /// En caso contrario, lanza ParseException con el mensaje indicado.
+        /// </summary>
+        private void ConsumeEOLorEOF(string errorMessage)
+        {
+            if (Peek().Type == TokenType.EOL)
+            {
+                Advance(); // consumir el EOL
+            }
+            else if (Peek().Type == TokenType.EOF)
+            {
+                // No hacemos nada, ya acabó el archivo
+            }
+            else
+            {
+                throw Error(Peek(), errorMessage);
+            }
+
+        }
+
 
     }
 

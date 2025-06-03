@@ -281,4 +281,13 @@ namespace Wall_E.Compiler
             return visitor.VisitGoToStmt(this);
         }
     }
+    public class EmptyStmt : Stmt
+    {
+        public EmptyStmt() { }
+
+        public override T Accept<T>(IStmtVisitor<T> visitor)
+        {
+            return visitor.VisitEmptyStmt(this);
+        }
+    }
 }

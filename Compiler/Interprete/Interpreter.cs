@@ -240,7 +240,6 @@ namespace Wall_E.Compiler
         }
         public object VisitGetColorCountStmt(GetColorCountStmt getColorCountNode)
         {
-            
             return $"Cantidad de";
         }
         public object VisitIsBrushColorStmt(IsBrushColorStmt isBrushColorNode)
@@ -262,6 +261,12 @@ namespace Wall_E.Compiler
             return canvas.GetPixelColor(h, v) == color;
         }
         public object VisitGoToStmt(GoToStmt GoToNode) => string.Empty;
+
+        public object VisitEmptyStmt(EmptyStmt emptyNode)
+        {
+            // No hace nada, simplemente retorna null
+            return null;
+        }
 
           public object VisitIdentifier(Identifier id)
         {
@@ -306,6 +311,10 @@ namespace Wall_E.Compiler
         public object VisitLiteralExpr(Literal literal)
         {
             return literal.Value;
+        }
+        public object VisitStringLiteralExpr(StringLiteral stringLiteral)
+        {
+            return stringLiteral.Value;
         }
 
         public object VisitGroupingExpr(Grouping grouping)
