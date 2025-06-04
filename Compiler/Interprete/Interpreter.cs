@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Godot;
 
 namespace Wall_E.Compiler
 {
@@ -33,10 +34,15 @@ namespace Wall_E.Compiler
             hadRuntimeError = false;
             try
             {
-                programNode.Execute(this);
+                foreach (var stmt in programNode.Statements)
+                {
+                    stmt.Accept(this);
+                }
             }
             catch (RuntimeError error)
             {
+                GD.Print($"Capturamos {error.Message}");
+                hadRuntimeError = true;
                 // Si llega aquí, agregamos a la lista (aunque idealmente cada Visit protegerá sus propias llamadas)
                 runtimeErrors.Add(error);
             }
@@ -81,26 +87,27 @@ namespace Wall_E.Compiler
             var X = (int)SafeEvaluate(spawnStmt.ExprX);
             var Y = (int)SafeEvaluate(spawnStmt.ExprY);
 
-            try
-            {
-                canvas.SpawnWallE(X, Y);
-                // Agregamos instrucción
-                instructions.Add(new Instruction(
-                    InstructionType.Spawn,
-                    X, Y
-                ));
-            }
-            catch (RuntimeError rte)
-            {
-                runtimeErrors.Add(rte);
-                hadRuntimeError = true;
-            }
+            ValidateCoords(spawnStmt.Keyword, X, Y);
+
+
+            canvas.SpawnWallE(X, Y);
+            // Agregamos instrucción
+            instructions.Add(new Instruction(
+                InstructionType.Spawn,
+                X, Y
+            ));
 
             return null;
         }
 
         public object VisitColorStmt(ColorStmt colorStmt)
         {
+            if (!(colorStmt.Color is StringLiteral))
+            {
+                GD.Print($"Entro {colorStmt.Color}");
+                throw new RuntimeError(colorStmt.Keyword.Line, colorStmt.Keyword.Column, "El color debe ser una cadena de texto.");
+            }
+
             var color = (string)SafeEvaluate(colorStmt.Color);
             try
             {
@@ -121,109 +128,80 @@ namespace Wall_E.Compiler
         public object VisitSizeStmt(SizeStmt sizeStmt)
         {
             var size = (int)SafeEvaluate(sizeStmt.Size);
-            try
-            {
-                canvas.SetSize(size);
-                instructions.Add(new Instruction(
-                    InstructionType.SetSize,
-                    size
+            if (size < 1 || size > canvas.Size)
+                throw new RuntimeError(sizeStmt.Keyword.Line, sizeStmt.Keyword.Column, "Tamanno de brocha invalido");
+           
+            canvas.SetSize(size);
+            instructions.Add(new Instruction(
+                InstructionType.SetSize,
+                size
                 ));
-            }
-            catch (RuntimeError rte)
-            {
-                runtimeErrors.Add(rte);
-                hadRuntimeError = true;
-            }
+
             return null;
         }
         public object VisitDrawLineStmt(DrawLineStmt drawLineStmt)
         {
-            var dirX = (int) SafeEvaluate(drawLineStmt.DirX);
-            var dirY = (int) SafeEvaluate(drawLineStmt.DirY);
-            var distance = (int) SafeEvaluate(drawLineStmt.Distance);
+            var dirX = (int)SafeEvaluate(drawLineStmt.DirX);
+            var dirY = (int)SafeEvaluate(drawLineStmt.DirY);
+            var distance = (int)SafeEvaluate(drawLineStmt.Distance);
             CheckValidDirection(drawLineStmt.Keyword, dirX, dirY);
-
-            try
-            {
-                canvas.DrawLine(dirX, dirY, distance);
-                instructions.Add(new Instruction(
-                    InstructionType.DrawLine,
-                    dirX, dirY, distance
-                ));
-            }
-            catch (RuntimeError rte)
-            {
-                runtimeErrors.Add(rte);
-                hadRuntimeError = true;
-            }
+            if (distance < 1) throw new RuntimeError(drawLineStmt.Keyword.Line, drawLineStmt.Keyword.Column, "La distancia debe ser mayor que 1");
+           
+            canvas.DrawLine(dirX, dirY, distance);
+            instructions.Add(new Instruction(
+                InstructionType.DrawLine,
+                dirX, dirY, distance
+            ));
+    
 
             return null;
 
         }
         public object VisitDrawCircleStmt(DrawCircleStmt drawCircleStmt)
         {
-             var dirX = (int)SafeEvaluate(drawCircleStmt.DirX);
+            var dirX = (int)SafeEvaluate(drawCircleStmt.DirX);
             var dirY = (int)SafeEvaluate(drawCircleStmt.DirY);
             var radius = (int)SafeEvaluate(drawCircleStmt.Radius);
             CheckValidDirection(drawCircleStmt.Keyword, dirX, dirY);
-
-            try
-            {
-                canvas.DrawCircle(dirX, dirY, radius);
-                instructions.Add(new Instruction(
-                    InstructionType.DrawCircle,
-                    dirX, dirY, radius
-                ));
-            }
-            catch (RuntimeError rte)
-            {
-                runtimeErrors.Add(rte);
-                hadRuntimeError = true;
-            }
+            
+            if(radius < 1 ) throw new RuntimeError(drawCircleStmt.Keyword.Line, drawCircleStmt.Keyword.Column, "El radio debe ser mayor que 1");
+            canvas.DrawCircle(dirX, dirY, radius);
+            instructions.Add(new Instruction(
+                InstructionType.DrawCircle,
+                dirX, dirY, radius
+            ));
 
             return null;
         }
         public object VisitDrawRectangleStmt(DrawRectangleStmt drawRectangleStmt)
         {
-             var dirX = (int)SafeEvaluate(drawRectangleStmt.DirX);
+            var dirX = (int)SafeEvaluate(drawRectangleStmt.DirX);
             var dirY = (int)SafeEvaluate(drawRectangleStmt.DirY);
             var width = (int)SafeEvaluate(drawRectangleStmt.Width);
             var height = (int)SafeEvaluate(drawRectangleStmt.Height);
             // (El parámetro Distance en tu AST parecía redundante; aquí asumimos solo ancho/alto)
             CheckValidDirection(drawRectangleStmt.Keyword, dirX, dirY);
-
-            try
-            {
-                // Si quisieras mover a Wall-E antes de dibujar, agrega canvas.MoveTo(...) aquí
-                canvas.DrawRectangle(dirX, dirY, width, height);
-                instructions.Add(new Instruction(
-                    InstructionType.DrawRectangle,
-                    dirX, dirY, width, height
-                ));
-            }
-            catch (RuntimeError rte)
-            {
-                runtimeErrors.Add(rte);
-                hadRuntimeError = true;
-            }
+            if (width < 1 || height < 1)
+                throw new RuntimeError(drawRectangleStmt.Keyword.Line, drawRectangleStmt.Keyword.Column, "El ancho y alto deben ser mayores que 0");
+           
+            // Si quisieras mover a Wall-E antes de dibujar, agrega canvas.MoveTo(...) aquí
+            canvas.DrawRectangle(dirX, dirY, width, height);
+            instructions.Add(new Instruction(
+                InstructionType.DrawRectangle,
+                dirX, dirY, width, height
+            ));
+           
 
             return null;
 
         }
         public object VisitFillStmt(FillStmt fillStmt)
         {
-             try
-            {
-                canvas.Fill();
-                instructions.Add(new Instruction(
-                    InstructionType.Fill
-                ));
-            }
-            catch (RuntimeError rte)
-            {
-                runtimeErrors.Add(rte);
-                hadRuntimeError = true;
-            }
+            canvas.Fill();
+            instructions.Add(new Instruction(
+            InstructionType.Fill
+            ));
+            
             return null;
         }
         public object VisitGetActualXStmt(GetActualXStmt getActualXNode)
@@ -251,7 +229,7 @@ namespace Wall_E.Compiler
         }
         public object VisitIsBrushSizeStmt(IsBrushSizeStmt isBrushSizeNode)
         {
-           return canvas.GetWallEPosX() == (int)SafeEvaluate(isBrushSizeNode.Size);
+            return canvas.GetWallEPosX() == (int)SafeEvaluate(isBrushSizeNode.Size);
         }
         public object VisitIsCanvasColorStmt(IsCanvasColorStmt isCanvasColorNode)
         {
@@ -261,18 +239,6 @@ namespace Wall_E.Compiler
             return canvas.GetPixelColor(h, v) == color;
         }
         public object VisitGoToStmt(GoToStmt GoToNode) => string.Empty;
-
-        public object VisitEmptyStmt(EmptyStmt emptyNode)
-        {
-            // No hace nada, simplemente retorna null
-            return null;
-        }
-
-          public object VisitIdentifier(Identifier id)
-        {
-            // Recupera el valor de la variable
-            return env.Get(id.Name);
-        }
 
         // Ejecutar una sentencia de expresión:
         public object VisitExpressionStmt(ExpressionStmt stmt)
@@ -286,7 +252,7 @@ namespace Wall_E.Compiler
             // Evalúa el lado derecho
             object value = SafeEvaluate(expr.Value);
             // Guarda en el entorno
-            env.Assign(expr.Name.Lexeme, value);
+            env.Assign(expr.Name, value);
             return value;
         }
 
@@ -409,7 +375,18 @@ namespace Wall_E.Compiler
                         $"Operador no soportado '{expr.Operator.Lexeme}'."
                     );
             }
-            
+
+        }
+        public object VisitEmptyStmt(EmptyStmt emptyNode)
+        {
+            // No hace nada, simplemente retorna null
+            return null;
+        }
+
+        public object VisitIdentifier(Identifier id)
+        {
+            // Recupera el valor de la variable
+            return env.Get(id.Name);
         }
         public object VisitEmptyExpr(EmptyExpr expr)
         {
@@ -485,8 +462,8 @@ namespace Wall_E.Compiler
                 throw new RuntimeError(operatorToken.Line, operatorToken.Column, "Direccion invalida");
             }
         }
-        
-          public void ClearErrors()
+
+        public void ClearErrors()
         {
             runtimeErrors.Clear();
             hadRuntimeError = false;
@@ -495,6 +472,11 @@ namespace Wall_E.Compiler
         public void ClearInstructions()
         {
             instructions.Clear();
+        }
+        public void ValidateCoords(Token Keyword, int X, int Y)
+        {
+            if (X < 0 || X >= canvas.Size || Y < 0 || Y >= canvas.Size)
+                throw new RuntimeError(Keyword.Line, Keyword.Column, $"Coordenadas fuera de rango: ({X}, {Y})");
         }
     }
 

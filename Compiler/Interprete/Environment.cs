@@ -8,18 +8,7 @@ namespace Wall_E.Compiler
 
         public Environment()
         {
-            values = new Dictionary<string, object>()
-        {
-            {"Black", "Black"},
-            {"Red", "Red"},
-            {"Blue", "Blue"},
-            {"Green", "Green"},
-            {"Yellow", "Yellow"},
-            {"Orange", "Orange"},
-            {"Purple", "Purple"},
-            {"White", "White"},
-            {"Transparent", "Transparent"},
-        };
+            values = new Dictionary<string, object>();
         }
         public object Get(Token id)
         {
@@ -28,17 +17,15 @@ namespace Wall_E.Compiler
                 $"Variable '{id.Lexeme}' no definida.");
         }
 
-        public void Assign(string name, object value)
+        public void Assign(Token name, object value)
         {
-            if (values.ContainsKey(name))
+            if (values.ContainsKey(name.Lexeme))
             {
-                values[name] = value;
-                return;
+                throw new RuntimeError(name.Line, name.Column,
+                    $"Variable '{name.Lexeme}' ya definida.");
             }
-            // Si prefieres que asignar a variable no existente cree una nueva:
-            values[name] = value;
-            // O, si prefieres error:
-            // throw new RuntimeError(…, $"Variable '{name}' no definida.");
+
+            values[name.Lexeme] = value;
         }
     }
 }

@@ -46,10 +46,10 @@ namespace Wall_E.Compiler
             AST += "Tokens: \n";
             foreach (var token in tokens)
             {
-                AST += $"Type: {token.Type} ";
-                AST += $"Lexeme: {token.Lexeme} ";
-                AST += $"Line: {token.Line} ";
-                AST += $"Column: {token.Column} \n";
+                AST += $"Type: {token.Type}   ";
+                AST += $"Lexeme: {token.Lexeme}   ";
+                AST += $"Line: {token.Line}   ";
+                AST += $"Column: {token.Column} \n   ";
 
             }
 

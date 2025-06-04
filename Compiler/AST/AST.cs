@@ -16,10 +16,7 @@ namespace Wall_E.Compiler
         public List<Stmt> Statements { get; } = new List<Stmt>();
         public void Execute(Interpreter interpreter)
         {
-            foreach (var stmt in Statements)
-            {
-                stmt.Accept(interpreter);
-            }
+           
         }
     }
 

@@ -8,7 +8,7 @@ namespace Wall_E.Compiler
     {
         Pixel[,] pixels;
         Wall_E Wall_E;
-        int Size;
+        public int Size { get; }
 
         public Canvas(int sizeCanvas)
         {
@@ -50,14 +50,12 @@ namespace Wall_E.Compiler
         }
         public string GetPixelColor(int x, int y)
         {
-            ValidateCoords(x, y);
             return pixels[y, x].Color;
         }
 
         // Cambiar color de un píxel
         private void SetPixelColor(int x, int y, string color)
         {
-            ValidateCoords(x, y);
             pixels[y, x].Color = color;
         }
         public int GetWallEPosX()
@@ -69,18 +67,13 @@ namespace Wall_E.Compiler
             return Wall_E.PosY;
         }
 
-        private void ValidateCoords(int x, int y)
-        {
-            if (x < 0 || x >= Size || y < 0 || y >= Size)
-                throw new InvalidOperationException($"Coordenadas fuera de rango: ({x}, {y})");
-        }
+        
 
         /// <summary>
         /// Sitúa a Wall-E en (x, y).
         /// </summary>
         public void SpawnWallE(int x, int y)
         {
-            ValidateCoords(x, y);
             Wall_E.MoveTo(x, y);
             PrintCanvas();
         }
@@ -93,15 +86,6 @@ namespace Wall_E.Compiler
         /// </summary>
         public void DrawLine(int dirX, int dirY, int distance)
         {
-            // Validar dirección: al menos uno de dirX o dirY debe ser -1,0,1
-            if (!(Math.Abs(dirX) == 1 && (dirY == 0)
-               || (Math.Abs(dirY) == 1 && (dirX == 0))
-               || (Math.Abs(dirX) == 1 && Math.Abs(dirY) == 1)))
-            {
-                throw new InvalidOperationException($"Dirección inválida para línea: ({dirX}, {dirY})");
-            }
-            if (distance < 1)
-                throw new InvalidOperationException("Distance debe ser >= 1");
 
             int x = Wall_E.PosX;
             int y = Wall_E.PosY;
@@ -118,7 +102,6 @@ namespace Wall_E.Compiler
                 PaintAt(x, y, Wall_E.BrushSize, Wall_E.BrushColor);
             }
 
-            ValidateCoords(x, y);
             Wall_E.MoveTo(x, y);
             PrintCanvas();
         }
@@ -130,14 +113,10 @@ namespace Wall_E.Compiler
         /// </summary>
         public void DrawCircle(int dirX, int dirY, int radius)
         {
-            if (radius < 0) throw new InvalidOperationException("Radius debe ser >= 0");
-
             var color = Wall_E.BrushColor;
             SetColor("Transparent");
             DrawLine(dirX, dirY, radius);
             SetColor(color);
-
-
 
             // Usamos el algoritmo de Bresenham para círculo o aproximación:
             int x0 = Wall_E.PosX;
@@ -170,12 +149,9 @@ namespace Wall_E.Compiler
         /// </summary>
         public void DrawRectangle(int dirX, int dirY, int width, int height)
         {
-            if (width < 1 || height < 1)
-                throw new InvalidOperationException("Width y Height deben ser >= 1.");
-
+            
             int startX = Wall_E.PosX + dirX;
             int startY = Wall_E.PosY + dirY;
-            ValidateCoords(startX, startY);
 
             // Dibujar bordes: 4 líneas
             // Línea superior
@@ -319,7 +295,6 @@ namespace Wall_E.Compiler
         }
         public void SetBrushSize(int size)
         {
-            if (size < 1) throw new ArgumentException("El tamaño de brocha debe ser >= 1.");
             BrushSize = size;
         }
         public void MoveTo(int x, int y)
