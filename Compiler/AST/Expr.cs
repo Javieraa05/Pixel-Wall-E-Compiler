@@ -125,6 +125,116 @@ namespace Wall_E.Compiler
         }
         public override T Accept<T>(IExprVisitor<T> visitor) => visitor.VisitLogicalExpr(this);
     }
+    public class GetActualXExpr : Expr
+    {
+        public GetActualXExpr() { }
+
+        public override T Accept<T>(IExprVisitor<T> visitor)
+        {
+            return visitor.VisitGetActualXExpr(this);
+        }
+    }
+
+    public class GetActualYExpr : Expr
+    {
+        public GetActualYExpr() { }
+
+        public override T Accept<T>(IExprVisitor<T> visitor)
+        {
+            return visitor.VisitGetActualYExpr(this);
+        }
+    }
+
+    public class GetCanvasSizeExpr : Expr
+    {
+        public GetCanvasSizeExpr() { }
+
+        public override T Accept<T>(IExprVisitor<T> visitor)
+        {
+            return visitor.VisitGetCanvasSizeExpr(this);
+        }
+    }
+
+    public class GetColorCountExpr : Expr
+    {
+        public Token Keyword;
+        public Expr Color { get; }
+        public Expr X1 { get; }
+        public Expr Y1 { get; }
+        public Expr X2 { get; }
+        public Expr Y2 { get; }
+
+        public GetColorCountExpr(Token keyword, Expr color, Expr x1, Expr y1, Expr x2, Expr y2)
+        {
+            Keyword = keyword;
+            Color = color;
+            X1 = x1;
+            Y1 = y1;
+            X2 = x2;
+            Y2 = y2;
+        }
+
+        public override T Accept<T>(IExprVisitor<T> visitor)
+        {
+            return visitor.VisitGetColorCountExpr(this);
+        }
+    }
+
+    public class IsBrushColorExpr : Expr
+    {
+        public Token Keyword;
+        public Expr Color { get; }
+
+        public IsBrushColorExpr(Token keyword, Expr color)
+        {
+            Keyword = keyword;
+            Color = color;
+        }
+
+        public override T Accept<T>(IExprVisitor<T> visitor)
+        {
+            return visitor.VisitIsBrushColorExpr(this);
+        }
+    }
+
+    public class IsBrushSizeExpr : Expr
+    {
+        public Token Keyword;
+        public Expr Size { get; }
+
+        public IsBrushSizeExpr(Token keyword, Expr size)
+        {
+            Keyword = keyword;
+            Size = size;
+        }
+
+        public override T Accept<T>(IExprVisitor<T> visitor)
+        {
+            return visitor.VisitIsBrushSizeExpr(this);
+        }
+    }
+
+    public class IsCanvasColorExpr : Expr
+    {
+        public Token Keyword;
+        public Expr Color { get; }
+        public Expr Vertical { get; }
+        public Expr Horizontal { get; }
+
+        public IsCanvasColorExpr(Token keyword, Expr color, Expr vertical, Expr horizontal)
+        {
+            Keyword = keyword;
+            Color = color;
+            Vertical = vertical;
+            Horizontal = horizontal;
+        }
+
+        public override T Accept<T>(IExprVisitor<T> visitor)
+        {
+            return visitor.VisitIsCanvasColorExpr(this);
+        }
+    }
+
    
     public class EmptyExpr : Expr
     {

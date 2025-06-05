@@ -5,7 +5,7 @@
 
 [sub_resource type="Gradient" id="Gradient_dce2j"]
 offsets = PackedFloat32Array(0.792208)
-colors = PackedColorArray(0.133982, 0.163665, 0.574856, 1)
+colors = PackedColorArray(0.0352941, 0.243137, 0.403922, 1)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_6ueyk"]
 gradient = SubResource("Gradient_dce2j")
@@ -13,7 +13,7 @@ gradient = SubResource("Gradient_dce2j")
 [sub_resource type="CodeHighlighter" id="CodeHighlighter_rjj1l"]
 number_color = Color(1, 1, 1, 1)
 symbol_color = Color(1, 1, 1, 1)
-function_color = Color(5.58317e-06, 0, 0.981519, 1)
+function_color = Color(0.157767, 0.391442, 0.999999, 1)
 member_variable_color = Color(0.233148, 0.457125, 1, 1)
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_3px2y"]
@@ -103,6 +103,7 @@ theme_override_constants/margin_bottom = 5
 [node name="TextEdit" type="TextEdit" parent="HBoxContainer/EditContainer/MarginContainer3"]
 custom_minimum_size = Vector2(0, 245)
 layout_mode = 2
+editable = false
 
 [node name="DisplayContainer" type="Control" parent="HBoxContainer"]
 custom_minimum_size = Vector2(880, 0)

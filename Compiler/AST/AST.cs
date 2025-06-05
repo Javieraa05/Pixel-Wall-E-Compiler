@@ -92,20 +92,20 @@ namespace Wall_E.Compiler
                     children.Add(drawRectangleStmt.Width);
                     children.Add(drawRectangleStmt.Height);
                     break;
-                case GetColorCountStmt getColorCountStmt:
+                case GetColorCountExpr getColorCountStmt:
                     children.Add(getColorCountStmt.Color);
                     children.Add(getColorCountStmt.X1);
                     children.Add(getColorCountStmt.Y1);
                     children.Add(getColorCountStmt.X2);
                     children.Add(getColorCountStmt.Y2);
                     break;
-                case IsBrushColorStmt isBrushColorStmt:
+                case IsBrushColorExpr isBrushColorStmt:
                     children.Add(isBrushColorStmt.Color);
                     break;
-                case IsBrushSizeStmt isBrushSizeStmt:
+                case IsBrushSizeExpr isBrushSizeStmt:
                     children.Add(isBrushSizeStmt.Size);
                     break;
-                case IsCanvasColorStmt isCanvasColorStmt:
+                case IsCanvasColorExpr isCanvasColorStmt:
                     children.Add(isCanvasColorStmt.Color);
                     children.Add(isCanvasColorStmt.Vertical);
                     children.Add(isCanvasColorStmt.Horizontal);

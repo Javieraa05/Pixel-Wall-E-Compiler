@@ -44,7 +44,9 @@ namespace Wall_E.Compiler
             {
                 try
                 {
-                    statements.Add(Statement());
+                    var stmt = Statement();
+                    if (stmt != null)
+                        statements.Add(stmt);
                 }
                 catch (ParseException ex)
                 {
@@ -61,6 +63,10 @@ namespace Wall_E.Compiler
 
         private Stmt Statement()
         {
+            if(Match(TokenType.EOL))
+            {
+                return null;
+            }
             if (Match(TokenType.Spawn))
             {
                 if (Spawned)
@@ -75,11 +81,9 @@ namespace Wall_E.Compiler
             }
             if (Match(TokenType.Color, TokenType.Size,
                        TokenType.DrawLine, TokenType.DrawCircle, TokenType.DrawRectangle,
-                       TokenType.Fill, TokenType.GetActualX, TokenType.GetActualY, TokenType.GetCanvasSize,
-                       TokenType.GetColorCount, TokenType.IsBrushColor, TokenType.IsBrushSize,
-                       TokenType.IsCanvasColor))
+                       TokenType.Fill))
             {
-                return CallStmt(Previous());
+                return (Stmt)CallStmt(Previous());
             }
             // 3) Si empieza con "GoTo"
             if (Match(TokenType.GoTo))
@@ -137,7 +141,7 @@ namespace Wall_E.Compiler
             return new GoToStmt(keyword, Label, Condition);
         }
 
-        private Stmt CallStmt(Token keyword)
+        private ASTNode CallStmt(Token keyword)
         {
             // 1. Consumir '('
             Consume(TokenType.LeftParen, $"Esperaba '(' después de '{keyword.Lexeme}'.");
@@ -162,9 +166,6 @@ namespace Wall_E.Compiler
                 throw Error(keyword, $"'{keyword.Lexeme}' espera {expected} argumentos, pero recibió {args.Count}.");
             }
 
-            // 5. Consumir EOL opcional
-            ConsumeEOLorEOF($"Esperaba un salto de línea después de '{Previous().Lexeme}'.");
-
             // 6. Construir el Stmt adecuado
             return keyword.Type switch
             {
@@ -175,20 +176,20 @@ namespace Wall_E.Compiler
                 TokenType.DrawCircle => new DrawCircleStmt(keyword, args[0], args[1], args[2]),
                 TokenType.DrawRectangle => new DrawRectangleStmt(keyword, args[0], args[1], args[2], args[3], args[4]),
                 TokenType.Fill => new FillStmt(),
-                TokenType.GetActualX => new GetActualXStmt(),
-                TokenType.GetActualY => new GetActualYStmt(),
-                TokenType.GetCanvasSize => new GetCanvasSizeStmt(),
-                TokenType.GetColorCount => new GetColorCountStmt(keyword, args[0], args[1], args[2], args[3], args[4]),
-                TokenType.IsBrushColor => new IsBrushColorStmt(keyword, args[0]),
-                TokenType.IsBrushSize => new IsBrushSizeStmt(keyword, args[0]),
-                TokenType.IsCanvasColor => new IsCanvasColorStmt(keyword, args[0], args[1], args[2]),
+                TokenType.GetActualX => new GetActualXExpr(),
+                TokenType.GetActualY => new GetActualYExpr(),
+                TokenType.GetCanvasSize => new GetCanvasSizeExpr(),
+                TokenType.GetColorCount => new GetColorCountExpr(keyword, args[0], args[1], args[2], args[3], args[4]),
+                TokenType.IsBrushColor => new IsBrushColorExpr(keyword, args[0]),
+                TokenType.IsBrushSize => new IsBrushSizeExpr(keyword, args[0]),
+                TokenType.IsCanvasColor => new IsCanvasColorExpr(keyword, args[0], args[1], args[2]),
                 _ => throw Error(keyword, $"Instrucción desconocida: {keyword.Lexeme}")
             };
         }
         private Stmt ExpressionStatement()
         {
             Expr expr = Expression();   
-            ConsumeEOLorEOF("Esperaba un salto de línea después de la expresión.");
+            ConsumeEOLorEOF($"Esperaba un salto de línea después de la expresión. {Previous().Lexeme}" );
             return new ExpressionStmt(expr);
         }
 
@@ -340,11 +341,14 @@ namespace Wall_E.Compiler
                 Token name = Previous();
                 return new Identifier(name);
             }
-            if(Match(TokenType.EOL))
+            if (Match(TokenType.GetActualX, TokenType.GetActualY, TokenType.GetCanvasSize,
+                       TokenType.GetColorCount, TokenType.IsBrushColor, TokenType.IsBrushSize,
+                       TokenType.IsCanvasColor))
             {
-                // Si encontramos un EOL, lo ignoramos y devolvemos una expresión vacía
-                return new EmptyExpr();
+                return (Expr)CallStmt(Previous());            
             }
+
+            
 
             throw Error(Peek(), $"{Peek().Lexeme} no es una expresión válida.");
 
@@ -391,19 +395,25 @@ namespace Wall_E.Compiler
 
         private void Synchronize()
         {
-            // Descartar el token que provocó el error
-            Advance();
-
-
-            while (!IsAtEnd())
-            {
-                if (Peek().Type == TokenType.EOL)
-                {
-                    Advance();
-                    break;
-                }
-                Advance();
-            }
+             Advance();
+    while (!IsAtEnd())
+    {
+        if (Previous().Type == TokenType.EOL)
+            return;
+        switch (Peek().Type)
+        {
+            case TokenType.Spawn:
+            case TokenType.Color:
+            case TokenType.Size:
+            case TokenType.DrawLine:
+            case TokenType.DrawCircle:
+            case TokenType.DrawRectangle:
+            case TokenType.Fill:
+            case TokenType.GoTo:
+                return;
+        }
+        Advance();
+    }
 
         }
         /// <summary>

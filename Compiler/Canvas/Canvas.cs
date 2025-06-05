@@ -1,6 +1,7 @@
 using System.Drawing;
 using System;
 using System.Collections.Generic;
+using Godot;
 
 namespace Wall_E.Compiler
 {
@@ -27,27 +28,8 @@ namespace Wall_E.Compiler
         {
             return pixels;
         }
-        public void PrintCanvas()
-        {
-            Console.WriteLine();
-
-            for (int i = 0; i < pixels.GetLength(0); i++)
-            {
-                for (int j = 0; j < pixels.GetLength(1); j++)
-                {
-                    if (Wall_E.PosX == i && Wall_E.PosY == j)
-                    {
-                        Console.Write("E ");
-                    }
-                    else
-                    {
-                        Console.Write(pixels[i, j].Color[0] + " ");
-                    }
-                }
-                Console.WriteLine();
-            }
-            Console.WriteLine("Color: " + Wall_E.BrushColor + "\nSize: " + Wall_E.BrushSize + "\n(" + Wall_E.PosX + ", " + Wall_E.PosY + ")");
-        }
+       
+        
         public string GetPixelColor(int x, int y)
         {
             return pixels[y, x].Color;
@@ -67,7 +49,7 @@ namespace Wall_E.Compiler
             return Wall_E.PosY;
         }
 
-        
+
 
         /// <summary>
         /// Sitúa a Wall-E en (x, y).
@@ -75,7 +57,6 @@ namespace Wall_E.Compiler
         public void SpawnWallE(int x, int y)
         {
             Wall_E.MoveTo(x, y);
-            PrintCanvas();
         }
 
         /// <summary>
@@ -103,7 +84,7 @@ namespace Wall_E.Compiler
             }
 
             Wall_E.MoveTo(x, y);
-            PrintCanvas();
+           
         }
 
         /// <summary>
@@ -113,10 +94,10 @@ namespace Wall_E.Compiler
         /// </summary>
         public void DrawCircle(int dirX, int dirY, int radius)
         {
-            var color = Wall_E.BrushColor;
-            SetColor("Transparent");
-            DrawLine(dirX, dirY, radius);
-            SetColor(color);
+            for (int i = 0; i < radius; i++)
+            {
+                Wall_E.MoveTo(Wall_E.PosX + dirX, Wall_E.PosY + dirY);
+            }
 
             // Usamos el algoritmo de Bresenham para círculo o aproximación:
             int x0 = Wall_E.PosX;
@@ -138,7 +119,6 @@ namespace Wall_E.Compiler
                     err += 1 - 2 * x;
                 }
             }
-            PrintCanvas();
         }
 
         /// <summary>
@@ -147,11 +127,18 @@ namespace Wall_E.Compiler
         /// de ancho 'width' y alto 'height'.
         /// Bordes: usan tamaño y color de brocha.
         /// </summary>
-        public void DrawRectangle(int dirX, int dirY, int width, int height)
+        public void DrawRectangle(int dirX, int dirY, int distance, int width, int height)
         {
-            
-            int startX = Wall_E.PosX + dirX;
-            int startY = Wall_E.PosY + dirY;
+            for (int i = 0; i < distance; i++)
+            {
+                Wall_E.MoveTo(Wall_E.PosX + dirX, Wall_E.PosY + dirY);
+            }
+
+            int startX = Wall_E.PosX - width / 2;
+            int startY = Wall_E.PosY - height / 2;
+
+            GD.Print($"Empezar en ({startX},{startY})");
+
 
             // Dibujar bordes: 4 líneas
             // Línea superior
@@ -166,7 +153,23 @@ namespace Wall_E.Compiler
             // Lado derecho
             for (int dy = 0; dy < height; dy++)
                 PaintAt(startX + width - 1, startY + dy, Wall_E.BrushSize, Wall_E.BrushColor);
-            // NOTA: no movemos a Wall-E
+
+        }
+        
+        public int GetColorCount(string color, int x1, int y1, int x2, int y2)
+        {
+            int count = 0;
+            for (int i = x1; i <= x2; i++)
+            {
+                for (int j = y1; j <= y2; j++)
+                {
+                    if (pixels[i, j].Color == color)
+                    {
+                        count++;
+                    }
+                }
+            }
+            return count;
         }
 
         /// <summary>
@@ -174,10 +177,42 @@ namespace Wall_E.Compiler
         /// </summary>
         public void Fill()
         {
-            for (int y = 0; y < Size; y++)
-                for (int x = 0; x < Size; x++)
-                    pixels[y, x].Color = Wall_E.BrushColor;
-            // La posición de Wall-E no cambia.
+            List<(int x, int y)> visited = new List<(int, int)>();
+
+            Queue<(int x, int y)> ToVisit = new Queue<(int, int)>();
+
+            int startX = Wall_E.PosX;
+            int startY = Wall_E.PosY;
+
+            string current = Wall_E.BrushColor;
+
+            string color = pixels[startX, startY].Color;
+
+            ToVisit.Enqueue((startX, startY));
+
+            pixels[startX, startY].Color = current;
+
+            int[] dirX = { 0, 1, 0, -1 };
+            int[] dirY = { 1, 0, -1, 0 };
+
+            while (ToVisit.Count > 0)
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    int newX = ToVisit.Peek().x + dirX[i];
+                    int newY = ToVisit.Peek().y + dirY[i];
+
+                    if (Valid(newX, newY, color))
+                    {
+
+                        pixels[newX, newY].Color = current;
+                        ToVisit.Enqueue((newX, newY));
+                    }
+                }
+                ToVisit.Dequeue();
+            }
+
+
         }
 
         // ===== Métodos auxiliares internos =====
@@ -259,6 +294,10 @@ namespace Wall_E.Compiler
             Wall_E.SetBrushSize(size);
         }
 
+        public bool Valid(int x, int y, string color)
+        {
+            return x >= 0 && x < Size && y >= 0 && y < Size && pixels[x, y].Color == color;
+        }
 
     }
 

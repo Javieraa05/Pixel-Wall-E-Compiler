@@ -104,25 +104,26 @@ namespace Wall_E.Compiler
         {
             if (!(colorStmt.Color is StringLiteral))
             {
-                GD.Print($"Entro {colorStmt.Color}");
                 throw new RuntimeError(colorStmt.Keyword.Line, colorStmt.Keyword.Column, "El color debe ser una cadena de texto.");
             }
 
             var color = (string)SafeEvaluate(colorStmt.Color);
+
             try
             {
-                canvas.SetColor(color);
-                instructions.Add(new Instruction(
-                    InstructionType.SetColor,
-                    color
-                ));
-            }
-            catch (RuntimeError rte)
+                // Verifica si el color está definido en el entorno
+                env.Get(new Token(TokenType.Identifier, color, colorStmt.Keyword.Line, colorStmt.Keyword.Column));
+            }           
+            catch
             {
-                runtimeErrors.Add(rte);
-                hadRuntimeError = true;
+                throw new RuntimeError(colorStmt.Keyword.Line, colorStmt.Keyword.Column, $"Color '{color}' no definido.");
             }
-
+            canvas.SetColor(color);
+            instructions.Add(new Instruction(
+                InstructionType.SetColor,
+                color
+            ));
+            
             return null;
         }
         public object VisitSizeStmt(SizeStmt sizeStmt)
@@ -177,15 +178,17 @@ namespace Wall_E.Compiler
         {
             var dirX = (int)SafeEvaluate(drawRectangleStmt.DirX);
             var dirY = (int)SafeEvaluate(drawRectangleStmt.DirY);
+            var distance = (int)SafeEvaluate(drawRectangleStmt.Distance);
             var width = (int)SafeEvaluate(drawRectangleStmt.Width);
             var height = (int)SafeEvaluate(drawRectangleStmt.Height);
-            // (El parámetro Distance en tu AST parecía redundante; aquí asumimos solo ancho/alto)
+            
+
             CheckValidDirection(drawRectangleStmt.Keyword, dirX, dirY);
-            if (width < 1 || height < 1)
-                throw new RuntimeError(drawRectangleStmt.Keyword.Line, drawRectangleStmt.Keyword.Column, "El ancho y alto deben ser mayores que 0");
+            if (width < 1 || height < 1 || distance < 0)
+                throw new RuntimeError(drawRectangleStmt.Keyword.Line, drawRectangleStmt.Keyword.Column, "Alto, ancho o distancia fuera de rango");
            
-            // Si quisieras mover a Wall-E antes de dibujar, agrega canvas.MoveTo(...) aquí
-            canvas.DrawRectangle(dirX, dirY, width, height);
+            canvas.DrawRectangle(dirX, dirY, distance, width, height);
+
             instructions.Add(new Instruction(
                 InstructionType.DrawRectangle,
                 dirX, dirY, width, height
@@ -204,34 +207,68 @@ namespace Wall_E.Compiler
             
             return null;
         }
-        public object VisitGetActualXStmt(GetActualXStmt getActualXNode)
+        public object VisitGetActualXExpr(GetActualXExpr getActualXNode)
         {
             return canvas.GetWallEPosX();
         }
-        public object VisitGetActualYStmt(GetActualYStmt getActualYNode)
+        public object VisitGetActualYExpr(GetActualYExpr getActualYNode)
         {
             return canvas.GetWallEPosY();
         }
-        public object VisitGetCanvasSizeStmt(GetCanvasSizeStmt getCanvasSizeNode)
+        public object VisitGetCanvasSizeExpr(GetCanvasSizeExpr getCanvasSizeNode)
         {
             return canvas.GetPixels().GetLength(0);
         }
-        public object VisitGetColorCountStmt(GetColorCountStmt getColorCountNode)
+        public object VisitGetColorCountExpr(GetColorCountExpr getColorCountNode)
         {
-            return $"Cantidad de";
+            var x1 = (int)SafeEvaluate(getColorCountNode.X1);
+            var y1 = (int)SafeEvaluate(getColorCountNode.Y1);
+            var x2 = (int)SafeEvaluate(getColorCountNode.X2);
+            var y2 = (int)SafeEvaluate(getColorCountNode.Y2);
+
+            try
+            {
+                ValidateCoords(getColorCountNode.Keyword, x1, y1);
+                ValidateCoords(getColorCountNode.Keyword, x2, y2);
+            }
+            catch
+            {
+                return 0;
+            }
+
+            if (!(getColorCountNode.Color is StringLiteral))
+            {
+                GD.Print($"Entro {getColorCountNode.Color}");
+                throw new RuntimeError(getColorCountNode.Keyword.Line, getColorCountNode.Keyword.Column, "El color debe ser una cadena de texto.");
+            }
+
+            var color = (string)SafeEvaluate(getColorCountNode.Color);
+            
+            try
+            {
+                // Verifica si el color está definido en el entorno
+                env.Get(new Token(TokenType.Identifier, color, getColorCountNode.Keyword.Line, getColorCountNode.Keyword.Column));
+            }           
+            catch
+            {
+                throw new RuntimeError(getColorCountNode.Keyword.Line, getColorCountNode.Keyword.Column, $"Color '{color}' no definido.");
+            }
+
+            
+            return canvas.GetColorCount(color, x1, y1, x2, y2);
         }
-        public object VisitIsBrushColorStmt(IsBrushColorStmt isBrushColorNode)
+        public object VisitIsBrushColorExpr(IsBrushColorExpr isBrushColorNode)
         {
             return canvas.GetPixelColor(
                 canvas.GetWallEPosX(),
                 canvas.GetWallEPosY()
             ) == (string)SafeEvaluate(isBrushColorNode.Color);
         }
-        public object VisitIsBrushSizeStmt(IsBrushSizeStmt isBrushSizeNode)
+        public object VisitIsBrushSizeExpr(IsBrushSizeExpr isBrushSizeNode)
         {
             return canvas.GetWallEPosX() == (int)SafeEvaluate(isBrushSizeNode.Size);
         }
-        public object VisitIsCanvasColorStmt(IsCanvasColorStmt isCanvasColorNode)
+        public object VisitIsCanvasColorExpr(IsCanvasColorExpr isCanvasColorNode)
         {
             var color = (string)SafeEvaluate(isCanvasColorNode.Color);
             var v = (int)SafeEvaluate(isCanvasColorNode.Vertical);

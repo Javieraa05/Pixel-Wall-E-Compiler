@@ -8,7 +8,22 @@ namespace Wall_E.Compiler
 
         public Environment()
         {
-            values = new Dictionary<string, object>();
+            values = new Dictionary<string, object>()
+            {
+                { "Red", "Red" },
+                { "Green", "Green" },
+                { "Blue", "Blue" },
+                { "Yellow" , "Yellow"},
+                { "Black", "Black" },
+                { "White", "White" },
+                { "Gray", "Gray" },
+                { "Cyan", "Cyan" },
+                { "Magenta", "Magenta" },
+                { "Orange", "Orange" },
+                { "Purple", "Purple" },
+                { "Pink", "Pink" },
+                { "Brown", "Brown" }
+            };
         }
         public object Get(Token id)
         {

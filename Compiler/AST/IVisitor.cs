@@ -12,6 +12,13 @@ namespace Wall_E.Compiler
         T VisitLogicalExpr(Logical expr);
         T VisitEmptyExpr(EmptyExpr expr);
         T VisitStringLiteralExpr(StringLiteral stringLiteral);
+        T VisitGetActualXExpr(GetActualXExpr getActualXNode);
+        T VisitGetActualYExpr(GetActualYExpr getActualYNode);
+        T VisitGetCanvasSizeExpr(GetCanvasSizeExpr getCanvasSizeNode);
+        T VisitGetColorCountExpr(GetColorCountExpr getColorCountNode);
+        T VisitIsBrushColorExpr(IsBrushColorExpr isBrushColorNode);
+        T VisitIsBrushSizeExpr(IsBrushSizeExpr isBrushSizeNode);
+        T VisitIsCanvasColorExpr(IsCanvasColorExpr isCanvasColorNode);
     }
 
     public interface IStmtVisitor<T>
@@ -25,13 +32,6 @@ namespace Wall_E.Compiler
         T VisitDrawCircleStmt(DrawCircleStmt drawCircleStmt);
         T VisitDrawRectangleStmt(DrawRectangleStmt drawRectangleleStmt);
         T VisitFillStmt(FillStmt fillStmt);
-        T VisitGetActualXStmt(GetActualXStmt getActualXNode);
-        T VisitGetActualYStmt(GetActualYStmt getActualYNode);
-        T VisitGetCanvasSizeStmt(GetCanvasSizeStmt getCanvasSizeNode);
-        T VisitGetColorCountStmt(GetColorCountStmt getColorCountNode);
-        T VisitIsBrushColorStmt(IsBrushColorStmt isBrushColorNode);
-        T VisitIsBrushSizeStmt(IsBrushSizeStmt isBrushSizeNode);
-        T VisitIsCanvasColorStmt(IsCanvasColorStmt isCanvasColorNode);
         T VisitGoToStmt(GoToStmt GoToNode);
         T VisitEmptyStmt(EmptyStmt emptyNode);
 

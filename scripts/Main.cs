@@ -95,22 +95,21 @@ public partial class Main : Control
     }
 
     private void OnRunButtonPressed()
+    {      
+        Compiler();
+    }
+    private void Compiler()
     {
-        GD.Print("Ejecutar Código");
+        // Obtener el código del editor
         string codigo = codeEdit.GetText();
-
+        // Imprimir el código en la consola para depuración
+        GD.Print("Ejecutar Código");
         GD.Print("Código a ejecutar: " + codigo);
-        
         if (string.IsNullOrWhiteSpace(codigo))
         {
             PrintConsole("El código está vacío. Por favor, escribe algo antes de ejecutar.");
             return;
         }
-        Compiler(codigo);
-    }
-    private void Compiler(string message)
-    {
-        string codigo = codeEdit.GetText();
         var core = new Core();
         RunResult resultado = core.Run(codigo, currentGridDivisions);
 
