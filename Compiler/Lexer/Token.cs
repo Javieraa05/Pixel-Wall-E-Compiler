@@ -5,6 +5,7 @@ namespace Wall_E.Compiler
     {
         // Comandos / Palabras reservadas
         Spawn,
+        ReSpawn,
         Color,
         Size,
         DrawLine,

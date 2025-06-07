@@ -19,8 +19,6 @@ public partial class Main : Control
 
     // Referencias a otros nodos de la interfaz
     private SpinBox boardSizeSpinBox;
-    private GridOverlay gridOverlay;
-    private TextureRect canvasTextureRect;
 
     // Tamaño fijo del canvas en píxeles
     private const int BoardPixelSize = 900;
@@ -28,6 +26,7 @@ public partial class Main : Control
     // Imagen y textura para el canvas
     private Image canvasImage;
     private ImageTexture canvasTexture;
+    private TextureRect canvasTextureRect;
 
     // Almacena el número actual de divisiones de la cuadrícula
     private int currentGridDivisions = 32;
@@ -37,7 +36,6 @@ public partial class Main : Control
     {
         // Obtén las referencias a los nodos hijos
         boardSizeSpinBox = GetNode<SpinBox>("HBoxContainer/EditContainer/MarginContainer2/ButtonContainer/SpinBox");
-        gridOverlay = GetNode<GridOverlay>("HBoxContainer/DisplayContainer/CanvasContainer/GridOverlay");
         canvasTextureRect = GetNode<TextureRect>("HBoxContainer/DisplayContainer/CanvasContainer/TextureRect");
         saveButton = GetNode<Button>("HBoxContainer/EditContainer/MarginContainer2/ButtonContainer/Save");
         loadButton = GetNode<Button>("HBoxContainer/EditContainer/MarginContainer2/ButtonContainer/Load");
@@ -53,6 +51,7 @@ public partial class Main : Control
 
         // Inicializa el canvas (imagen) y la textura
         InicializarCanvas();
+        PintarCuadrícula();
         currentGridDivisions = (int)boardSizeSpinBox.Value;
 
         // Crear y configurar el FileDialog para guardar archivos
@@ -62,7 +61,7 @@ public partial class Main : Control
         // No se asigna la propiedad Mode, ya que produce error en esta versión
         fileDialogSave.Filters = new string[] { "*.gw" };
         AddChild(fileDialogSave);
-        fileDialogSave.Connect("file_selected", new Callable(this, nameof(_OnFileDialogSaveFileSelected)));
+        fileDialogSave.FileSelected += _OnFileDialogSaveFileSelected;
 
         // Crear y configurar el FileDialog para cargar archivos
         fileDialogLoad = new FileDialog();
@@ -70,34 +69,10 @@ public partial class Main : Control
         // No se asigna la propiedad Mode, ya que produce error en esta versión
         fileDialogLoad.Filters = new string[] { "*.gw" };
         AddChild(fileDialogLoad);
-        fileDialogLoad.Connect("file_selected", new Callable(this, nameof(_OnFileDialogLoadFileSelected)));
-
-       
-
+        fileDialogLoad.FileSelected += _OnFileDialogLoadFileSelected;
     }
 
-    private void OnSaveButtonPressed()
-    {
-        GD.Print("Guardar Código");
-        fileDialogSave.PopupCentered();
-        fileDialogSave.Size = new Vector2I(600, 400); // ancho x alto
-        fileDialogLoad.Size = new Vector2I(600, 400);
-
-    }
-
-    private void OnLoadButtonPressed()
-    {
-        GD.Print("Cargar Código");
-        fileDialogLoad.PopupCentered();
-        fileDialogSave.Size = new Vector2I(600, 400); // ancho x alto
-        fileDialogLoad.Size = new Vector2I(600, 400);
-
-    }
-
-    private void OnRunButtonPressed()
-    {      
-        Compiler();
-    }
+  
     private void Compiler()
     {
         // Obtener el código del editor
@@ -110,11 +85,12 @@ public partial class Main : Control
             PrintConsole("El código está vacío. Por favor, escribe algo antes de ejecutar.");
             return;
         }
-        var core = new Core();
+        Core core = new Core();
+
         RunResult resultado = core.Run(codigo, currentGridDivisions);
 
+
         GD.Print(resultado.AST);
-        
         // 1) Si hay errores, los mostramos en pantalla (p. ej. en un Panel o Label):
         if (resultado.Errors.Count > 0)
         {
@@ -130,7 +106,7 @@ public partial class Main : Control
 
         // Si llegamos aquí, significa que no hay errores de compilación.
         GD.Print("Código compilado correctamente. Ejecutando...");
-       
+
         // 2) No hay errores -> obtenemos la matriz de píxeles y la lista de instrucciones:
         Canvas canvas = resultado.Canvas;
         List<Instruction> instrucciones = resultado.Instructions;
@@ -140,7 +116,6 @@ public partial class Main : Control
         // Pintamos la matriz de píxeles en el canvas
         Print(canvas);
     }
-
     private void Print(Canvas canvas)
     {
         Pixel[,] pixels = canvas.GetPixels();
@@ -168,6 +143,7 @@ public partial class Main : Control
                 PintarCelda(y, x, new Color(color));
             }
         }
+        PintarCuadrícula();
     }
     private void PrintConsole(string message)
     {
@@ -178,29 +154,7 @@ public partial class Main : Control
         canvasImage.Fill(Colors.White);
         canvasTexture.Update(canvasImage);
         textOut.Text = "";
-    }
-    private void _OnFileDialogSaveFileSelected(string ruta)
-    {
-        GuardarArchivo(ruta);
-        GD.Print("Archivo guardado en: " + ruta);
-    }
-
-    private void _OnFileDialogLoadFileSelected(string ruta)
-    {
-        CargarArchivo(ruta);
-        GD.Print("Archivo cargado desde: " + ruta);
-    }
-
-    private void OnBoardSizeChanged(double newValue)
-    {
-        // Limpiar el canvas antes de pintar
-        Reset();
-        int newSize = (int)newValue;
-        currentGridDivisions = newSize;
-        gridOverlay.SetGridDivisions(newSize);
-        GD.Print("Nuevo número de divisiones: " + newSize);
-    }
-
+    }   
     private void InicializarCanvas()
     {
         canvasImage = Image.CreateEmpty(BoardPixelSize, BoardPixelSize, false, Image.Format.Rgba8);
@@ -208,7 +162,6 @@ public partial class Main : Control
         canvasTexture = ImageTexture.CreateFromImage(canvasImage);
         canvasTextureRect.Texture = canvasTexture;
     }
-
     // Función para pintar una celda completa en el canvas
     public void PintarCelda(int cellX, int cellY, Color color)
     {
@@ -229,7 +182,71 @@ public partial class Main : Control
         }
         canvasTexture.Update(canvasImage);
     }
+    public void PintarCuadrícula()
+    {
+        int divisions = currentGridDivisions;
+        float cellSizeF = (float)BoardPixelSize / divisions;
 
+        for (int i = 0; i <= divisions; i++)
+        {
+            int pos = (int)(i * cellSizeF);
+
+             // Si pos es igual a BoardPixelSize, lo ajustamos al último índice válido (899).
+            if (pos >= BoardPixelSize)
+                pos = BoardPixelSize - 1;
+
+            // Línea vertical
+            for (int y = 0; y < BoardPixelSize; y++)
+                canvasImage.SetPixel(pos, y, Colors.Black);
+
+            // Línea horizontal
+            for (int x = 0; x < BoardPixelSize; x++)
+                canvasImage.SetPixel(x, pos, Colors.Black);
+        }
+
+        canvasTexture.Update(canvasImage);
+    }
+     private void OnRunButtonPressed()
+    {
+        Compiler();
+    }
+    private void OnSaveButtonPressed()
+    {
+        GD.Print("Guardar Código");
+        fileDialogSave.PopupCentered();
+        fileDialogSave.Size = new Vector2I(600, 400); // ancho x alto
+        fileDialogLoad.Size = new Vector2I(600, 400);
+
+    }
+    private void OnLoadButtonPressed()
+    {
+        GD.Print("Cargar Código");
+        fileDialogLoad.PopupCentered();
+        fileDialogSave.Size = new Vector2I(600, 400); // ancho x alto
+        fileDialogLoad.Size = new Vector2I(600, 400);
+
+    }
+    private void _OnFileDialogSaveFileSelected(string ruta)
+    {
+        GuardarArchivo(ruta);
+        PintarCuadrícula();
+        GD.Print("Archivo guardado en: " + ruta);
+    }
+    private void _OnFileDialogLoadFileSelected(string ruta)
+    {
+        CargarArchivo(ruta);
+        PintarCuadrícula();
+        GD.Print("Archivo cargado desde: " + ruta);
+    }
+    private void OnBoardSizeChanged(double newValue)
+    {
+        // Limpiar el canvas antes de pintar
+        Reset();
+        int newSize = (int)newValue;
+        currentGridDivisions = newSize;
+        PintarCuadrícula();
+        GD.Print("Nuevo número de divisiones: " + newSize);
+    }
     // Función para guardar el contenido del editor en un archivo
     private void GuardarArchivo(string ruta)
     {
@@ -237,7 +254,6 @@ public partial class Main : Control
         archivo.StoreString(codeEdit.GetText());
         archivo.Close();
     }
-
     // Función para cargar el contenido de un archivo en el editor
     private void CargarArchivo(string ruta)
     {

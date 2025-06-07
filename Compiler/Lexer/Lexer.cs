@@ -21,6 +21,7 @@ namespace Wall_E.Compiler
             new Dictionary<string, TokenType>(StringComparer.Ordinal)
         {
         {"Spawn", TokenType.Spawn },
+        {"ReSpawn", TokenType.ReSpawn },
         {"Color", TokenType.Color },
         {"Size", TokenType.Size },
         {"DrawLine", TokenType.DrawLine },

@@ -34,6 +34,8 @@ namespace Wall_E.Compiler
         T VisitFillStmt(FillStmt fillStmt);
         T VisitGoToStmt(GoToStmt GoToNode);
         T VisitEmptyStmt(EmptyStmt emptyNode);
+        T VisitLabelStmt(LabelStmt labelNode);
+        T VisitReSpawnStmt(ReSpawnStmt reSpawn);
 
         // Métodos para nodos de Program
         T VisitProgramNode(ProgramNode program);

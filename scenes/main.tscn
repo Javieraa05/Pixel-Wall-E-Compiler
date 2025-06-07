@@ -1,7 +1,6 @@
-[gd_scene load_steps=7 format=3 uid="uid://bv5w8b3u03t4y"]
+[gd_scene load_steps=6 format=3 uid="uid://bv5w8b3u03t4y"]
 
 [ext_resource type="Script" path="res://scripts/Main.cs" id="1_l8jyc"]
-[ext_resource type="Script" path="res://scripts/GridOverlay.cs" id="3_6gu13"]
 
 [sub_resource type="Gradient" id="Gradient_dce2j"]
 offsets = PackedFloat32Array(0.792208)
@@ -125,15 +124,6 @@ offset_bottom = 955.5
 grow_horizontal = 2
 grow_vertical = 2
 texture = SubResource("CanvasTexture_3px2y")
-
-[node name="GridOverlay" type="Control" parent="HBoxContainer/DisplayContainer/CanvasContainer"]
-custom_minimum_size = Vector2(900, 900)
-anchors_preset = 0
-offset_left = -30.0
-offset_top = 56.0
-offset_right = 870.0
-offset_bottom = 956.0
-script = ExtResource("3_6gu13")
 
 [node name="FileDialog" type="FileDialog" parent="HBoxContainer/DisplayContainer"]
 position = Vector2i(0, 36)

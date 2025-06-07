@@ -28,7 +28,11 @@ namespace Wall_E.Compiler
         {
             return pixels;
         }
-       
+        
+        public string GetBrushColor()
+        {
+            return Wall_E.GetBrushColor();
+        }
         
         public string GetPixelColor(int x, int y)
         {
@@ -58,6 +62,11 @@ namespace Wall_E.Compiler
         {
             Wall_E.MoveTo(x, y);
         }
+        
+        public void ReSpawnWallE(int x, int y)
+        {
+            Wall_E.MoveTo(x, y);
+        }
 
         /// <summary>
         /// Dibuja una línea desde la posición actual de Wall-E, 
@@ -84,7 +93,7 @@ namespace Wall_E.Compiler
             }
 
             Wall_E.MoveTo(x, y);
-           
+
         }
 
         /// <summary>
@@ -131,13 +140,16 @@ namespace Wall_E.Compiler
         {
             for (int i = 0; i < distance; i++)
             {
-                Wall_E.MoveTo(Wall_E.PosX + dirX, Wall_E.PosY + dirY);
+                // Mover a Wall-E en la dirección indicada
+                int newX = Wall_E.PosX + dirX;
+                int newY = Wall_E.PosY + dirY;
+                Wall_E.MoveTo(newX,newY);
             }
 
             int startX = Wall_E.PosX - width / 2;
             int startY = Wall_E.PosY - height / 2;
 
-            GD.Print($"Empezar en ({startX},{startY})");
+            GD.Print($"Empezar rectangulo en ({startX},{startY})");
 
 
             // Dibujar bordes: 4 líneas
@@ -188,9 +200,13 @@ namespace Wall_E.Compiler
 
             string color = pixels[startX, startY].Color;
 
+            // Si ya es del mismo color, no hay nada que hacer
+            if (current == color) return;
+
             ToVisit.Enqueue((startX, startY));
 
             pixels[startX, startY].Color = current;
+
 
             int[] dirX = { 0, 1, 0, -1 };
             int[] dirY = { 1, 0, -1, 0 };
@@ -340,6 +356,10 @@ namespace Wall_E.Compiler
         {
             PosX = x;
             PosY = y;
+        }
+        public string GetBrushColor()
+        {
+            return BrushColor;
         }
         
     }

@@ -17,6 +17,7 @@ namespace Wall_E.Compiler
 
         // Lista de instrucciones gráficas que deben enviarse a Godot (en orden)
         private readonly List<Instruction> instructions = new List<Instruction>();
+        private Dictionary<string, int> labelTable = new Dictionary<string, int>();
 
         public Interpreter(int sizeCanvas)
         {
@@ -31,20 +32,94 @@ namespace Wall_E.Compiler
         /// </summary>
         public void Interpret(ProgramNode programNode)
         {
-            hadRuntimeError = false;
-            try
+             hadRuntimeError = false;
+            labelTable.Clear();
+            // 1) Primer pase: indexar todas las etiquetas
+            var stmts = programNode.Statements;
+            for (int i = 0; i < stmts.Count; i++)
             {
-                foreach (var stmt in programNode.Statements)
+                if (stmts[i] is LabelStmt label)
                 {
-                    stmt.Accept(this);
+                    string name = label.Name.Lexeme;
+                    if (labelTable.ContainsKey(name))
+                    {
+                        // Etiqueta duplicada = error en tiempo de compilación (o lo tratamos como runtime)
+                        throw new RuntimeError(label.Name.Line, label.Name.Column,
+                            $"Etiqueta '{name}' ya definida en otra línea.");
+                    }
+                    labelTable[name] = i;
                 }
             }
-            catch (RuntimeError error)
+
+            // 2) Segundo pase: ejecución por índice
+            int current = 0;
+            int steps = 0;
+            const int maxSteps = 10000;
+
+            while (current < stmts.Count)
             {
-                GD.Print($"Capturamos {error.Message}");
-                hadRuntimeError = true;
-                // Si llega aquí, agregamos a la lista (aunque idealmente cada Visit protegerá sus propias llamadas)
-                runtimeErrors.Add(error);
+                Stmt stmt = stmts[current];
+
+                GD.Print($"[Interpret] Paso {steps}, índice {current}, stmt = {stmt.GetType().Name}");
+
+                try
+                {
+                    if (++steps > maxSteps)
+                         throw new RuntimeError(0, 0, $"Límite de pasos ({maxSteps}) alcanzado. Posible bucle infinito.");
+
+                    if (stmt is GoToStmt goTo)
+                    {
+                        // Evaluar condición
+                        object condValue = SafeEvaluate(goTo.Condition);
+                        bool truthy = IsTruthy(condValue);
+
+                        GD.Print($"[Interpret] Paso {steps}, índice {current}, stmt = {stmt.GetType().Name}");
+
+                        if (truthy)
+                        {
+                            // La etiqueta debe ser un Identifier
+                            if (!(goTo.Label is Identifier id))
+                            {
+                                throw new RuntimeError(goTo.Keyword.Line, goTo.Keyword.Column,
+                                    "La etiqueta debe ser un identificador simple.");
+                            }
+
+                            string labelName = id.Name.Lexeme;
+                            if (!labelTable.TryGetValue(labelName, out int targetIndex))
+                            {
+                                throw new RuntimeError(id.Name.Line, id.Name.Column,
+                                    $"Etiqueta '{labelName}' no encontrada.");
+                            }
+                            GD.Print($"[GoTo] Saltando de {current} a etiqueta '{labelName}' en {targetIndex}");
+                            // Salto: seteamos current a targetIndex
+                            current = targetIndex;
+                            continue; // no avanzamos current++, porque ya lo modificamos
+                        }
+                        else
+                        {
+                            current++;
+                        }
+                    }
+                    else if (stmt is LabelStmt)
+                    {
+                        // Las etiquetas no hacen nada en ejecución. Simplemente avanzamos.
+                        current++;
+                    }
+                    else
+                    {
+                        // Cualquier otra sentencia se ejecuta con el visitor normal:
+                        stmt.Accept(this);
+                        current++;
+                    }
+                }
+                catch (RuntimeError rte)
+                {
+                    GD.Print($"[RuntimeError] Línea {rte.Line}, Col {rte.Column}: {rte.Message}");
+                    hadRuntimeError = true;
+                    runtimeErrors.Add(rte);
+                    //Si hubo un error, lo registramos y continuamos con la siguiente sentencia
+                    current++;
+                }
             }
         }
         /// <summary>
@@ -99,7 +174,22 @@ namespace Wall_E.Compiler
 
             return null;
         }
+        public object VisitReSpawnStmt(ReSpawnStmt reSpawnStmt)
+        {
+            var X = (int)SafeEvaluate(reSpawnStmt.ExprX);
+            var Y = (int)SafeEvaluate(reSpawnStmt.ExprY);
 
+            ValidateCoords(reSpawnStmt.Keyword, X, Y);
+
+            canvas.ReSpawnWallE(X, Y);
+            // Agregamos instrucción
+            instructions.Add(new Instruction(
+                InstructionType.ReSpawn,
+                X, Y
+            ));
+
+            return null;
+        }
         public object VisitColorStmt(ColorStmt colorStmt)
         {
             if (!(colorStmt.Color is StringLiteral))
@@ -166,6 +256,8 @@ namespace Wall_E.Compiler
             CheckValidDirection(drawCircleStmt.Keyword, dirX, dirY);
             
             if(radius < 1 ) throw new RuntimeError(drawCircleStmt.Keyword.Line, drawCircleStmt.Keyword.Column, "El radio debe ser mayor que 1");
+            CheckValidMove(drawCircleStmt.Keyword, dirX, dirY, radius);
+
             canvas.DrawCircle(dirX, dirY, radius);
             instructions.Add(new Instruction(
                 InstructionType.DrawCircle,
@@ -187,6 +279,7 @@ namespace Wall_E.Compiler
             if (width < 1 || height < 1 || distance < 0)
                 throw new RuntimeError(drawRectangleStmt.Keyword.Line, drawRectangleStmt.Keyword.Column, "Alto, ancho o distancia fuera de rango");
            
+            CheckValidMove(drawRectangleStmt.Keyword, dirX, dirY, distance);
             canvas.DrawRectangle(dirX, dirY, distance, width, height);
 
             instructions.Add(new Instruction(
@@ -238,7 +331,6 @@ namespace Wall_E.Compiler
 
             if (!(getColorCountNode.Color is StringLiteral))
             {
-                GD.Print($"Entro {getColorCountNode.Color}");
                 throw new RuntimeError(getColorCountNode.Keyword.Line, getColorCountNode.Keyword.Column, "El color debe ser una cadena de texto.");
             }
 
@@ -259,23 +351,53 @@ namespace Wall_E.Compiler
         }
         public object VisitIsBrushColorExpr(IsBrushColorExpr isBrushColorNode)
         {
-            return canvas.GetPixelColor(
-                canvas.GetWallEPosX(),
-                canvas.GetWallEPosY()
-            ) == (string)SafeEvaluate(isBrushColorNode.Color);
+            if (!(isBrushColorNode.Color is StringLiteral))
+            {
+                throw new RuntimeError(isBrushColorNode.Keyword.Line, isBrushColorNode.Keyword.Column, "El color debe ser una cadena de texto.");
+            }
+            var color = (string)SafeEvaluate(isBrushColorNode.Color);
+            
+            try
+            {
+                // Verifica si el color está definido en el entorno
+                env.Get(new Token(TokenType.Identifier, color, isBrushColorNode.Keyword.Line, isBrushColorNode.Keyword.Column));
+            }           
+            catch
+            {
+                throw new RuntimeError(isBrushColorNode.Keyword.Line, isBrushColorNode.Keyword.Column, $"Color '{color}' no definido.");
+            }
+
+            return canvas.GetBrushColor() == color;   
         }
         public object VisitIsBrushSizeExpr(IsBrushSizeExpr isBrushSizeNode)
         {
-            return canvas.GetWallEPosX() == (int)SafeEvaluate(isBrushSizeNode.Size);
+            return canvas.Size == (int)SafeEvaluate(isBrushSizeNode.Size);
         }
         public object VisitIsCanvasColorExpr(IsCanvasColorExpr isCanvasColorNode)
         {
+            var v = (int)SafeEvaluate(isCanvasColorNode.Vertical) + canvas.GetWallEPosY();
+            var h = (int)SafeEvaluate(isCanvasColorNode.Horizontal) + canvas.GetWallEPosX();
+
+            try
+            {
+                ValidateCoords(isCanvasColorNode.Keyword, h, v);
+            }
+            catch
+            {
+                return 0;
+            }
+            
+            if (!(isCanvasColorNode.Color is StringLiteral))
+            {
+                throw new RuntimeError(isCanvasColorNode.Keyword.Line, isCanvasColorNode.Keyword.Column, "El color debe ser una cadena de texto.");
+            }
             var color = (string)SafeEvaluate(isCanvasColorNode.Color);
-            var v = (int)SafeEvaluate(isCanvasColorNode.Vertical);
-            var h = (int)SafeEvaluate(isCanvasColorNode.Horizontal);
+            
+
             return canvas.GetPixelColor(h, v) == color;
         }
         public object VisitGoToStmt(GoToStmt GoToNode) => string.Empty;
+        public object VisitLabelStmt(LabelStmt labelStmt) => string.Empty;
 
         // Ejecutar una sentencia de expresión:
         public object VisitExpressionStmt(ExpressionStmt stmt)
@@ -480,10 +602,6 @@ namespace Wall_E.Compiler
                 throw new RuntimeError(operatorToken.Line, operatorToken.Column, "Ambos operandos deben ser números.");
         }
 
-        private string Stringify(object obj)
-        {
-            return obj == null ? "null" : obj.ToString();
-        }
 
         private bool IsTruthy(object obj)
         {
@@ -498,6 +616,18 @@ namespace Wall_E.Compiler
             {
                 throw new RuntimeError(operatorToken.Line, operatorToken.Column, "Direccion invalida");
             }
+        }
+        private void CheckValidMove(Token operatorToken, int dirX, int dirY, int distance)
+        {
+            int temX = canvas.GetWallEPosX();
+            int temY = canvas.GetWallEPosY();
+            for (int i = 0; i < distance; i++)
+            {
+                int newX = temX + dirX;
+                int newY = temY + dirY;
+                ValidateCoords(operatorToken, newX, newY);
+            }
+            
         }
 
         public void ClearErrors()

@@ -34,12 +34,6 @@ namespace Wall_E.Compiler
 
         public void Assign(Token name, object value)
         {
-            if (values.ContainsKey(name.Lexeme))
-            {
-                throw new RuntimeError(name.Line, name.Column,
-                    $"Variable '{name.Lexeme}' ya definida.");
-            }
-
             values[name.Lexeme] = value;
         }
     }

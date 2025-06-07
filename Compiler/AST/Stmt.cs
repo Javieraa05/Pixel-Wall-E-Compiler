@@ -41,6 +41,24 @@ namespace Wall_E.Compiler
             return visitor.VisitSpawnStmt(this);
         }
     }
+    public class ReSpawnStmt : Stmt
+    {
+        public Token Keyword;
+        public Expr ExprX;
+        public Expr ExprY;
+
+        public ReSpawnStmt(Token token, Expr exprX, Expr exprY)
+        {
+            Keyword = token;
+            ExprX = exprX;
+            ExprY = exprY;
+        }
+
+        public override T Accept<T>(IStmtVisitor<T> visitor)
+        {
+            return visitor.VisitReSpawnStmt(this);
+        }
+    }
 
     public class ColorStmt : Stmt
     {
@@ -153,6 +171,20 @@ namespace Wall_E.Compiler
         }
     }
 
+     public class LabelStmt : Stmt
+    {
+        public Token Name { get; }
+
+        public LabelStmt(Token name)
+        {
+            Name = name;
+        }
+
+        public override T Accept<T>(IStmtVisitor<T> visitor)
+        {
+            return visitor.VisitLabelStmt(this);
+        }
+    }
     
     public class GoToStmt : Stmt
     {

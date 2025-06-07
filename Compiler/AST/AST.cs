@@ -114,6 +114,11 @@ namespace Wall_E.Compiler
                     children.Add(goToStmt.Label);
                     children.Add(goToStmt.Condition);
                     break;
+                case ReSpawnStmt reSpawnStmt:
+                    children.Add(reSpawnStmt.ExprX);
+                    children.Add(reSpawnStmt.ExprY);
+                    break;
+            
             }
 
             for (int i = 0; i < children.Count; i++)

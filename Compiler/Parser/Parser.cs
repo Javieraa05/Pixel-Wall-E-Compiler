@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using Godot;
 
 namespace Wall_E.Compiler
 {
@@ -15,6 +16,7 @@ namespace Wall_E.Compiler
         private static readonly Dictionary<TokenType, int> arity = new()
     {
         { TokenType.Spawn,        2 },
+        { TokenType.ReSpawn,      2 },
         { TokenType.Color,        1 },
         { TokenType.Size,         1 },
         { TokenType.DrawLine,     3 },
@@ -63,7 +65,12 @@ namespace Wall_E.Compiler
 
         private Stmt Statement()
         {
-            if(Match(TokenType.EOL))
+            if (Check(TokenType.Identifier) && (PeekNext().Type == TokenType.EOL || PeekNext().Type == TokenType.EOF))
+            {
+                Token labelToken = Advance();       // consume IDENTIFIER
+                return new LabelStmt(labelToken);
+            }
+            if (Match(TokenType.EOL))
             {
                 return null;
             }
@@ -79,7 +86,7 @@ namespace Wall_E.Compiler
                     return ParseSpawnStmt();
                 }
             }
-            if (Match(TokenType.Color, TokenType.Size,
+            if (Match(TokenType.ReSpawn,TokenType.Color, TokenType.Size,
                        TokenType.DrawLine, TokenType.DrawCircle, TokenType.DrawRectangle,
                        TokenType.Fill))
             {
@@ -132,6 +139,7 @@ namespace Wall_E.Compiler
 
             Consume(TokenType.LeftParen, "Esperaba '(' después de 'GoTo'.");
             Expr Condition = Expression();
+
             Consume(TokenType.RightParen, "Esperaba ')' después de Condition.");
 
             if (Peek().Type is TokenType.EOF) return new GoToStmt(keyword, Label, Condition);
@@ -170,6 +178,7 @@ namespace Wall_E.Compiler
             return keyword.Type switch
             {
                 TokenType.Spawn => new SpawnStmt(keyword, args[0], args[1]),
+                TokenType.ReSpawn => new ReSpawnStmt(keyword, args[0], args[1]),
                 TokenType.Color => new ColorStmt(keyword, args[0]),
                 TokenType.Size => new SizeStmt(keyword, args[0]),
                 TokenType.DrawLine => new DrawLineStmt(keyword, args[0], args[1], args[2]),
@@ -379,6 +388,7 @@ namespace Wall_E.Compiler
         private bool IsAtEnd() => Peek().Type == TokenType.EOF;
 
         private Token Peek() => tokens[current];
+        private Token PeekNext() => tokens[current+1];
 
         private Token Previous() => tokens[current - 1];
 

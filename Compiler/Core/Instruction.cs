@@ -5,6 +5,7 @@ namespace Wall_E.Compiler
     public enum InstructionType
     {
         Spawn,
+        ReSpawn,
         SetColor,
         SetSize,
         DrawLine,
