@@ -4,16 +4,16 @@
 
 [sub_resource type="Gradient" id="Gradient_dce2j"]
 offsets = PackedFloat32Array(0.792208)
-colors = PackedColorArray(0.0352941, 0.243137, 0.403922, 1)
+colors = PackedColorArray(0.0137821, 0.146883, 0.255803, 1)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_6ueyk"]
 gradient = SubResource("Gradient_dce2j")
 
 [sub_resource type="CodeHighlighter" id="CodeHighlighter_rjj1l"]
-number_color = Color(1, 1, 1, 1)
-symbol_color = Color(1, 1, 1, 1)
-function_color = Color(0.157767, 0.391442, 0.999999, 1)
-member_variable_color = Color(0.233148, 0.457125, 1, 1)
+number_color = Color(0.862745, 0.862745, 0.666667, 1)
+symbol_color = Color(0.862745, 0.807843, 0.505882, 1)
+function_color = Color(0.490196, 0.862745, 0.996078, 1)
+member_variable_color = Color(0.337255, 0.611765, 0.839216, 1)
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_3px2y"]
 
@@ -64,11 +64,19 @@ text = "Load"
 layout_mode = 2
 text = "Save"
 
+[node name="Reset" type="Button" parent="HBoxContainer/EditContainer/MarginContainer2/ButtonContainer"]
+layout_mode = 2
+text = "Reset"
+
 [node name="SpinBox" type="SpinBox" parent="HBoxContainer/EditContainer/MarginContainer2/ButtonContainer"]
 layout_mode = 2
 min_value = 2.0
 max_value = 256.0
 value = 32.0
+
+[node name="CheckWallE" type="CheckButton" parent="HBoxContainer/EditContainer/MarginContainer2/ButtonContainer"]
+layout_mode = 2
+text = "Wall-E"
 
 [node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/EditContainer"]
 layout_mode = 2
@@ -78,7 +86,9 @@ theme_override_constants/margin_right = 50
 [node name="CodeEdit" type="CodeEdit" parent="HBoxContainer/EditContainer/MarginContainer"]
 custom_minimum_size = Vector2(900, 650)
 layout_mode = 2
-text = "Spawn(1,0)
+text = "Spawn(1,1)
+Color(\"Blue\")
+Fill()
 "
 minimap_draw = true
 syntax_highlighter = SubResource("CodeHighlighter_rjj1l")
@@ -124,7 +134,3 @@ offset_bottom = 955.5
 grow_horizontal = 2
 grow_vertical = 2
 texture = SubResource("CanvasTexture_3px2y")
-
-[node name="FileDialog" type="FileDialog" parent="HBoxContainer/DisplayContainer"]
-position = Vector2i(0, 36)
-size = Vector2i(400, 400)

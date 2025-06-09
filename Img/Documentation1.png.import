@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d0j8b7aohdgie"
-path="res://.godot/imported/Letrero.png-b8a496bb8afa37053ea58c92a73235c1.ctex"
+uid="uid://g6tg8fhcbma1"
+path="res://.godot/imported/Documentation1.png-e8e92461972f64254b77c679bb98d759.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Img/Letrero.png"
-dest_files=["res://.godot/imported/Letrero.png-b8a496bb8afa37053ea58c92a73235c1.ctex"]
+source_file="res://Img/Documentation1.png"
+dest_files=["res://.godot/imported/Documentation1.png-e8e92461972f64254b77c679bb98d759.ctex"]
 
 [params]
 

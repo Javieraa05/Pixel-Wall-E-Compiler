@@ -2,12 +2,18 @@ using Godot;
 using System;
 using Wall_E.Compiler;
 using System.Collections.Generic;
+using System.IO;
 public partial class Main : Control
 {
+    [Export]
+    public Font GridFont { get; set; }
     // Botones
     private Button runButton;
     private Button loadButton;
-    private Button saveButton;  
+    private Button saveButton;
+    private Button checkWall_E;
+    private Button resetButton;
+    private bool Wall_E_Paint = false;
     
     // Nodo del editor de código
     private CodeEdit codeEdit;
@@ -27,7 +33,6 @@ public partial class Main : Control
     private Image canvasImage;
     private ImageTexture canvasTexture;
     private TextureRect canvasTextureRect;
-
     // Almacena el número actual de divisiones de la cuadrícula
     private int currentGridDivisions = 32;
 
@@ -40,22 +45,27 @@ public partial class Main : Control
         saveButton = GetNode<Button>("HBoxContainer/EditContainer/MarginContainer2/ButtonContainer/Save");
         loadButton = GetNode<Button>("HBoxContainer/EditContainer/MarginContainer2/ButtonContainer/Load");
         runButton = GetNode<Button>("HBoxContainer/EditContainer/MarginContainer2/ButtonContainer/Run");
+        resetButton = GetNode<Button>("HBoxContainer/EditContainer/MarginContainer2/ButtonContainer/Reset");
+        checkWall_E = GetNode<Button>("HBoxContainer/EditContainer/MarginContainer2/ButtonContainer/CheckWallE");
         codeEdit = GetNode<CodeEdit>("HBoxContainer/EditContainer/MarginContainer/CodeEdit");
         textOut = GetNode<TextEdit>("HBoxContainer/EditContainer/MarginContainer3/TextEdit");
+        
 
         // Conectar señales de botones
         boardSizeSpinBox.ValueChanged += OnBoardSizeChanged;
         runButton.Pressed += OnRunButtonPressed;
         saveButton.Pressed += OnSaveButtonPressed;
         loadButton.Pressed += OnLoadButtonPressed;
+        checkWall_E.Pressed += OnCheckWallEPressed;
+        resetButton.Pressed += OnResetButtonPressed;
 
         // Inicializa el canvas (imagen) y la textura
         InicializarCanvas();
-        PintarCuadrícula();
         currentGridDivisions = (int)boardSizeSpinBox.Value;
 
         // Crear y configurar el FileDialog para guardar archivos
         fileDialogSave = new FileDialog();
+        fileDialogSave.FileMode = FileDialog.FileModeEnum.SaveFile;
         // Usamos Filesystem en lugar de User
         fileDialogSave.Access = FileDialog.AccessEnum.Filesystem;
         // No se asigna la propiedad Mode, ya que produce error en esta versión
@@ -65,6 +75,7 @@ public partial class Main : Control
 
         // Crear y configurar el FileDialog para cargar archivos
         fileDialogLoad = new FileDialog();
+        fileDialogLoad.FileMode = FileDialog.FileModeEnum.OpenAny;
         fileDialogLoad.Access = FileDialog.AccessEnum.Filesystem;
         // No se asigna la propiedad Mode, ya que produce error en esta versión
         fileDialogLoad.Filters = new string[] { "*.gw" };
@@ -119,30 +130,45 @@ public partial class Main : Control
     private void Print(Canvas canvas)
     {
         Pixel[,] pixels = canvas.GetPixels();
+        int divs = currentGridDivisions;
+        int baseW = BoardPixelSize / divs;
+        int remW = BoardPixelSize % divs;
+        int baseH = BoardPixelSize / divs;
+        int remH = BoardPixelSize % divs;
 
-        for (int y = 0; y < currentGridDivisions; y++)
+        int yPos = 0;
+        for (int y = 0; y < divs; y++)
         {
-            for (int x = 0; x < currentGridDivisions; x++)
+            // Altura de esta fila:
+            int rowHeight = (y < remH) ? baseH + 1 : baseH;
+
+            int xPos = 0;
+            for (int x = 0; x < divs; x++)
             {
+                int colWidth = (x < remW) ? baseW + 1 : baseW;
+                var rect = new Rect2I(new Vector2I(xPos, yPos), new Vector2I(colWidth, rowHeight));
+
                 string color = pixels[y, x].ToString();
-
-                if (canvas.GetWallEPosX() == y && canvas.GetWallEPosY() == x)
+                if ((canvas.GetWallEPosX() == x && canvas.GetWallEPosY() == y) && Wall_E_Paint)
                 {
-                    // Pintar Wall-E en la posición actual
-                    PintarCelda(y, x, new Color("#FFD700")); // Color dorado para Wall-E
-                    GD.Print($"Pintando Wall-E en la celda ({y}, {x})");
-                    continue;
+                    canvasImage.FillRect(rect, Colors.Cyan);
+                    GD.Print($"Walle: ({y},{x})");
+                }
+                 else if (color != "Transparent")
+                {
+                    canvasImage.FillRect(rect, new Color(color));
                 }
 
-                if (color == "Transparent")
-                {
-                    GD.Print($"Celda ({x}, {y}) es transparente, no se pintará.");
-                    continue; // No pintar celdas transparentes
-                }
-
-                PintarCelda(y, x, new Color(color));
+                xPos += colWidth;
             }
+
+            yPos += rowHeight;
         }
+
+        
+
+        canvasTexture.Update(canvasImage);
+        canvasTextureRect.Texture = canvasTexture;     
         PintarCuadrícula();
     }
     private void PrintConsole(string message)
@@ -161,50 +187,43 @@ public partial class Main : Control
         canvasImage.Fill(Colors.White);
         canvasTexture = ImageTexture.CreateFromImage(canvasImage);
         canvasTextureRect.Texture = canvasTexture;
-    }
-    // Función para pintar una celda completa en el canvas
-    public void PintarCelda(int cellX, int cellY, Color color)
-    {
-        float cellSize = (float)BoardPixelSize / currentGridDivisions;
-        int startX = (int)(cellX * cellSize);
-        int startY = (int)(cellY * cellSize);
-        int cellPixelSize = (int)cellSize;
-
-        for (int x = startX; x < startX + cellPixelSize; x++)
-        {
-            for (int y = startY; y < startY + cellPixelSize; y++)
-            {
-                if (x < BoardPixelSize && y < BoardPixelSize)
-                {
-                    canvasImage.SetPixel(x, y, color);
-                }
-            }
-        }
-        canvasTexture.Update(canvasImage);
+        PintarCuadrícula();
     }
     public void PintarCuadrícula()
     {
-        int divisions = currentGridDivisions;
-        float cellSizeF = (float)BoardPixelSize / divisions;
+        Color gridColor = Colors.Black;
+        int divs = currentGridDivisions;
+        int baseW = BoardPixelSize / divs;
+        int remW = BoardPixelSize % divs;
+        int baseH = BoardPixelSize / divs;
+        int remH = BoardPixelSize % divs;
 
-        for (int i = 0; i <= divisions; i++)
+        // Acumulamos posiciones de línea en X
+        int xPos = 0;
+        for (int i = 0; i <= divs; i++)
         {
-            int pos = (int)(i * cellSizeF);
+            // Dibujo una línea vertical 1px de ancho en xPos
+            var lineV = new Rect2I(new Vector2I(xPos, 0), new Vector2I(1, BoardPixelSize));
+            canvasImage.FillRect(lineV, gridColor);
 
-             // Si pos es igual a BoardPixelSize, lo ajustamos al último índice válido (899).
-            if (pos >= BoardPixelSize)
-                pos = BoardPixelSize - 1;
+            // Incremento xPos: para i<divs avanzo ancho de celda i
+            if (i < divs)
+                xPos += (i < remW) ? (baseW + 1) : baseW;
+        }
 
-            // Línea vertical
-            for (int y = 0; y < BoardPixelSize; y++)
-                canvasImage.SetPixel(pos, y, Colors.Black);
+        // Acumulamos posiciones de línea en Y
+        int yPos = 0;
+        for (int j = 0; j <= divs; j++)
+        {
+            var lineH = new Rect2I(new Vector2I(0, yPos), new Vector2I(BoardPixelSize, 1));
+            canvasImage.FillRect(lineH, gridColor);
 
-            // Línea horizontal
-            for (int x = 0; x < BoardPixelSize; x++)
-                canvasImage.SetPixel(x, pos, Colors.Black);
+            if (j < divs)
+                yPos += (j < remH) ? (baseH + 1) : baseH;
         }
 
         canvasTexture.Update(canvasImage);
+        canvasTextureRect.Texture = canvasTexture;
     }
      private void OnRunButtonPressed()
     {
@@ -225,6 +244,16 @@ public partial class Main : Control
         fileDialogSave.Size = new Vector2I(600, 400); // ancho x alto
         fileDialogLoad.Size = new Vector2I(600, 400);
 
+    }
+    private void OnResetButtonPressed()
+    {
+        GD.Print("Reiniciar Canvas");
+        Reset();
+        PintarCuadrícula();
+    }
+    private void OnCheckWallEPressed()
+    {
+        Wall_E_Paint = !Wall_E_Paint;
     }
     private void _OnFileDialogSaveFileSelected(string ruta)
     {

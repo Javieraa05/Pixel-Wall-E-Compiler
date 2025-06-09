@@ -236,8 +236,9 @@ namespace Wall_E.Compiler
             var dirY = (int)SafeEvaluate(drawLineStmt.DirY);
             var distance = (int)SafeEvaluate(drawLineStmt.Distance);
             CheckValidDirection(drawLineStmt.Keyword, dirX, dirY);
-            if (distance < 1) throw new RuntimeError(drawLineStmt.Keyword.Line, drawLineStmt.Keyword.Column, "La distancia debe ser mayor que 1");
-           
+            if (distance < 0) throw new RuntimeError(drawLineStmt.Keyword.Line, drawLineStmt.Keyword.Column, "La distancia debe ser mayor que 0");
+            CheckValidMove(drawLineStmt.Keyword, dirX, dirY, distance);
+
             canvas.DrawLine(dirX, dirY, distance);
             instructions.Add(new Instruction(
                 InstructionType.DrawLine,
@@ -280,6 +281,7 @@ namespace Wall_E.Compiler
                 throw new RuntimeError(drawRectangleStmt.Keyword.Line, drawRectangleStmt.Keyword.Column, "Alto, ancho o distancia fuera de rango");
            
             CheckValidMove(drawRectangleStmt.Keyword, dirX, dirY, distance);
+
             canvas.DrawRectangle(dirX, dirY, distance, width, height);
 
             instructions.Add(new Instruction(
@@ -619,14 +621,10 @@ namespace Wall_E.Compiler
         }
         private void CheckValidMove(Token operatorToken, int dirX, int dirY, int distance)
         {
-            int temX = canvas.GetWallEPosX();
-            int temY = canvas.GetWallEPosY();
-            for (int i = 0; i < distance; i++)
-            {
-                int newX = temX + dirX;
-                int newY = temY + dirY;
-                ValidateCoords(operatorToken, newX, newY);
-            }
+            int temX = canvas.GetWallEPosX()+dirX*distance;
+            int temY = canvas.GetWallEPosY()+dirY*distance;
+            GD.Print($"({temX},{temY})");
+            ValidateCoords(operatorToken, temX, temY);
             
         }
 
@@ -642,7 +640,7 @@ namespace Wall_E.Compiler
         }
         public void ValidateCoords(Token Keyword, int X, int Y)
         {
-            if (X < 0 || X >= canvas.Size || Y < 0 || Y >= canvas.Size)
+            if (X < 0 || X > canvas.Size || Y < 0 || Y > canvas.Size)
                 throw new RuntimeError(Keyword.Line, Keyword.Column, $"Coordenadas fuera de rango: ({X}, {Y})");
         }
     }

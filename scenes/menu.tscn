@@ -1,41 +1,80 @@
-[gd_scene load_steps=14 format=3 uid="uid://c6bst0c0anhv5"]
+[gd_scene load_steps=28 format=3 uid="uid://c6bst0c0anhv5"]
 
 [ext_resource type="Texture2D" uid="uid://dxyn0xbrxtow2" path="res://Img/wall-e.png" id="1_gc3pd"]
-[ext_resource type="Texture2D" uid="uid://ba5ovtbqtbq5e" path="res://Img/Letrero.png" id="2_8bsrc"]
-[ext_resource type="Script" path="res://scripts/Salir.cs" id="6_5em4c"]
+[ext_resource type="Script" path="res://scripts/Menu.cs" id="1_jk1xu"]
+[ext_resource type="Texture2D" uid="uid://d0j8b7aohdgie" path="res://Img/Letrero.png" id="2_8bsrc"]
+[ext_resource type="Texture2D" uid="uid://8uks7g7yovrc" path="res://Img/Start2.png" id="4_qtbg5"]
+[ext_resource type="Texture2D" uid="uid://oc44hl8s8i1h" path="res://Img/Start3.png" id="5_gm0pt"]
+[ext_resource type="Texture2D" uid="uid://l8ceo0trilwc" path="res://Img/Start1.png" id="6_dk4v3"]
+[ext_resource type="Texture2D" uid="uid://bsvimttefgspw" path="res://Img/Documentation3.png" id="7_dm5wv"]
+[ext_resource type="Texture2D" uid="uid://ccc2g75w65gd3" path="res://Img/Documentation2.png" id="7_kpery"]
+[ext_resource type="Texture2D" uid="uid://g6tg8fhcbma1" path="res://Img/Documentation1.png" id="8_0degc"]
+[ext_resource type="Texture2D" uid="uid://bvk1qw71lgdi6" path="res://Img/Credits2.png" id="9_8nwvc"]
+[ext_resource type="Texture2D" uid="uid://cgyl3k1mblniy" path="res://Img/Credits3.png" id="10_t72k5"]
+[ext_resource type="Texture2D" uid="uid://c0lxtck3s5gwu" path="res://Img/Credits1.png" id="11_6wn85"]
+[ext_resource type="Texture2D" uid="uid://cgvoan6ur8u6p" path="res://Img/Exit2.png" id="12_xg82h"]
+[ext_resource type="Texture2D" uid="uid://bqfekxf2aabkg" path="res://Img/Exit3.png" id="13_hg6xx"]
+[ext_resource type="Texture2D" uid="uid://n0haehxxcq16" path="res://Img/Exit1.png" id="14_ommwu"]
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_13oan"]
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_xcn7a"]
+texture = ExtResource("4_qtbg5")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_4ix5y"]
+texture = ExtResource("5_gm0pt")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_8sbgp"]
+texture = ExtResource("6_dk4v3")
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_bgnjx"]
+texture = ExtResource("7_kpery")
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_vx165"]
+texture = ExtResource("7_dm5wv")
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_lpxn0"]
+texture = ExtResource("8_0degc")
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_8fotv"]
+texture = ExtResource("9_8nwvc")
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_2fqwf"]
+texture = ExtResource("10_t72k5")
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_cirpl"]
+texture = ExtResource("11_6wn85")
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_12wnh"]
+texture = ExtResource("12_xg82h")
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_yb18c"]
+texture = ExtResource("13_hg6xx")
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_hvhho"]
+texture = ExtResource("14_ommwu")
 
 [node name="Menu" type="Node"]
+script = ExtResource("1_jk1xu")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0470588, 0.25098, 0.415686, 1)
 
 [node name="TextureRect" type="TextureRect" parent="."]
-offset_right = 1920.0
-offset_bottom = 1080.0
+offset_left = -201.0
+offset_top = -3.0
+offset_right = 1719.0
+offset_bottom = 1077.0
 texture = ExtResource("1_gc3pd")
 
 [node name="TextureRect2" type="TextureRect" parent="."]
-offset_left = 1248.0
-offset_top = -2.0
-offset_right = 1948.0
-offset_bottom = 498.0
+offset_left = 1150.0
+offset_top = -4.0
+offset_right = 1874.0
+offset_bottom = 520.0
 texture = ExtResource("2_8bsrc")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
@@ -44,37 +83,38 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -434.0
-offset_top = -501.0
-offset_right = -134.0
-offset_bottom = -89.0
+offset_left = -566.0
+offset_top = -509.0
+offset_right = -266.0
+offset_bottom = -97.0
 grow_horizontal = 0
 grow_vertical = 0
 theme_override_constants/separation = 20
 
-[node name="Comenzar" type="Button" parent="VBoxContainer"]
+[node name="ButtonStart" type="Button" parent="VBoxContainer"]
 custom_minimum_size = Vector2(250, 75)
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxTexture_13oan")
+theme_override_styles/hover = SubResource("StyleBoxTexture_xcn7a")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_4ix5y")
+theme_override_styles/normal = SubResource("StyleBoxTexture_8sbgp")
 
-[node name="Documentacion" type="Button" parent="VBoxContainer"]
+[node name="ButtonDocumentation" type="Button" parent="VBoxContainer"]
 custom_minimum_size = Vector2(250, 75)
 layout_mode = 2
 theme_override_styles/hover = SubResource("StyleBoxTexture_bgnjx")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_vx165")
 theme_override_styles/normal = SubResource("StyleBoxTexture_lpxn0")
 
-[node name="Creditos" type="Button" parent="VBoxContainer"]
+[node name="ButtonCredits" type="Button" parent="VBoxContainer"]
 custom_minimum_size = Vector2(250, 75)
 layout_mode = 2
 theme_override_styles/hover = SubResource("StyleBoxTexture_8fotv")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_2fqwf")
 theme_override_styles/normal = SubResource("StyleBoxTexture_cirpl")
 
-[node name="Salir" type="Button" parent="VBoxContainer"]
+[node name="ButtonExit" type="Button" parent="VBoxContainer"]
 custom_minimum_size = Vector2(250, 75)
 layout_mode = 2
 theme_override_styles/hover = SubResource("StyleBoxTexture_12wnh")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_yb18c")
 theme_override_styles/normal = SubResource("StyleBoxTexture_hvhho")
-script = ExtResource("6_5em4c")

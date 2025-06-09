@@ -92,7 +92,7 @@ namespace Wall_E.Compiler
                 PaintAt(x, y, Wall_E.BrushSize, Wall_E.BrushColor);
             }
 
-            Wall_E.MoveTo(x, y);
+            Wall_E.MoveTo(x+dirY, y+dirX);
 
         }
 
