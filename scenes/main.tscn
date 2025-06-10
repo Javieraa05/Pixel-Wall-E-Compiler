@@ -4,7 +4,7 @@
 
 [sub_resource type="Gradient" id="Gradient_dce2j"]
 offsets = PackedFloat32Array(0.792208)
-colors = PackedColorArray(0.0137821, 0.146883, 0.255803, 1)
+colors = PackedColorArray(0.00884924, 0.11283, 0.203375, 1)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_6ueyk"]
 gradient = SubResource("Gradient_dce2j")
@@ -35,9 +35,10 @@ grow_vertical = 2
 texture = SubResource("GradientTexture2D_6ueyk")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
+custom_minimum_size = Vector2(1920, 1080)
 layout_mode = 0
-offset_right = 1920.0
-offset_bottom = 1080.0
+offset_right = 1983.0
+offset_bottom = 1135.0
 
 [node name="EditContainer" type="VBoxContainer" parent="HBoxContainer"]
 custom_minimum_size = Vector2(960, 0)
@@ -81,7 +82,7 @@ text = "Wall-E"
 [node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/EditContainer"]
 layout_mode = 2
 theme_override_constants/margin_left = 50
-theme_override_constants/margin_right = 50
+theme_override_constants/margin_right = 25
 
 [node name="CodeEdit" type="CodeEdit" parent="HBoxContainer/EditContainer/MarginContainer"]
 custom_minimum_size = Vector2(900, 650)
@@ -106,7 +107,7 @@ auto_brace_completion_highlight_matching = true
 layout_mode = 2
 theme_override_constants/margin_left = 50
 theme_override_constants/margin_top = 5
-theme_override_constants/margin_right = 50
+theme_override_constants/margin_right = 25
 theme_override_constants/margin_bottom = 5
 
 [node name="TextEdit" type="TextEdit" parent="HBoxContainer/EditContainer/MarginContainer3"]
@@ -114,23 +115,48 @@ custom_minimum_size = Vector2(0, 245)
 layout_mode = 2
 editable = false
 
-[node name="DisplayContainer" type="Control" parent="HBoxContainer"]
-custom_minimum_size = Vector2(880, 0)
+[node name="CanvasContainer" type="VBoxContainer" parent="HBoxContainer"]
+custom_minimum_size = Vector2(960, 0)
 layout_mode = 2
 
-[node name="CanvasContainer" type="Control" parent="HBoxContainer/DisplayContainer"]
-custom_minimum_size = Vector2(960, 1080)
-anchors_preset = 0
-offset_right = 960.0
-offset_bottom = 1080.0
+[node name="HContainer" type="HBoxContainer" parent="HBoxContainer/CanvasContainer"]
+layout_mode = 2
 
-[node name="TextureRect" type="TextureRect" parent="HBoxContainer/DisplayContainer/CanvasContainer"]
+[node name="MarginText" type="MarginContainer" parent="HBoxContainer/CanvasContainer/HContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 712
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_bottom = 4
+
+[node name="TextPosition" type="TextEdit" parent="HBoxContainer/CanvasContainer/HContainer/MarginText"]
+custom_minimum_size = Vector2(55, 25)
+layout_mode = 2
+mouse_force_pass_scroll_events = false
+editable = false
+scroll_past_end_of_file = true
+caret_move_on_right_click = false
+caret_multiple = false
+use_default_word_separators = false
+
+[node name="MarginButtom" type="MarginContainer" parent="HBoxContainer/CanvasContainer/HContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_bottom = 5
+
+[node name="Documentation" type="Button" parent="HBoxContainer/CanvasContainer/HContainer/MarginButtom"]
+clip_contents = true
+custom_minimum_size = Vector2(50, 25)
+layout_mode = 2
+text = "Documentation"
+
+[node name="Canvas" type="MarginContainer" parent="HBoxContainer/CanvasContainer"]
+custom_minimum_size = Vector2(960, 1080)
+layout_mode = 2
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 106
+theme_override_constants/margin_bottom = 178
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer/CanvasContainer/Canvas"]
 custom_minimum_size = Vector2(900, 900)
 layout_mode = 2
-offset_left = -30.0
-offset_top = 55.5
-offset_right = 870.0
-offset_bottom = 955.5
-grow_horizontal = 2
-grow_vertical = 2
 texture = SubResource("CanvasTexture_3px2y")

@@ -5,19 +5,19 @@ using System.Collections.Generic;
 using System.IO;
 public partial class Main : Control
 {
-    [Export]
-    public Font GridFont { get; set; }
     // Botones
     private Button runButton;
     private Button loadButton;
     private Button saveButton;
     private Button checkWall_E;
     private Button resetButton;
+    private Button documentationButton;
     private bool Wall_E_Paint = false;
     
     // Nodo del editor de código
     private CodeEdit codeEdit;
     private TextEdit textOut;
+    private TextEdit textPosition;
     
     // FileDialogs para guardar y cargar archivos
     private FileDialog fileDialogSave;
@@ -41,14 +41,17 @@ public partial class Main : Control
     {
         // Obtén las referencias a los nodos hijos
         boardSizeSpinBox = GetNode<SpinBox>("HBoxContainer/EditContainer/MarginContainer2/ButtonContainer/SpinBox");
-        canvasTextureRect = GetNode<TextureRect>("HBoxContainer/DisplayContainer/CanvasContainer/TextureRect");
+        canvasTextureRect = GetNode<TextureRect>("HBoxContainer/CanvasContainer/Canvas/TextureRect");
         saveButton = GetNode<Button>("HBoxContainer/EditContainer/MarginContainer2/ButtonContainer/Save");
         loadButton = GetNode<Button>("HBoxContainer/EditContainer/MarginContainer2/ButtonContainer/Load");
         runButton = GetNode<Button>("HBoxContainer/EditContainer/MarginContainer2/ButtonContainer/Run");
         resetButton = GetNode<Button>("HBoxContainer/EditContainer/MarginContainer2/ButtonContainer/Reset");
         checkWall_E = GetNode<Button>("HBoxContainer/EditContainer/MarginContainer2/ButtonContainer/CheckWallE");
+        documentationButton = GetNode<Button>("HBoxContainer/CanvasContainer/HContainer/MarginButtom/Documentation");
         codeEdit = GetNode<CodeEdit>("HBoxContainer/EditContainer/MarginContainer/CodeEdit");
         textOut = GetNode<TextEdit>("HBoxContainer/EditContainer/MarginContainer3/TextEdit");
+        textPosition = GetNode<TextEdit>("HBoxContainer/CanvasContainer/HContainer/MarginText/TextPosition");
+
         
 
         // Conectar señales de botones
@@ -58,6 +61,7 @@ public partial class Main : Control
         loadButton.Pressed += OnLoadButtonPressed;
         checkWall_E.Pressed += OnCheckWallEPressed;
         resetButton.Pressed += OnResetButtonPressed;
+        documentationButton.Pressed += OnDocumentationButtonPressed;
 
         // Inicializa el canvas (imagen) y la textura
         InicializarCanvas();
@@ -151,10 +155,14 @@ public partial class Main : Control
                 string color = pixels[y, x].ToString();
                 if ((canvas.GetWallEPosX() == x && canvas.GetWallEPosY() == y) && Wall_E_Paint)
                 {
-                    canvasImage.FillRect(rect, Colors.Cyan);
+
+                    Texture2D iconTexture = GD.Load<Texture2D>("res://Img/WallE.png");
+                    Image imageWallE= iconTexture.GetImage();
+                    imageWallE.Convert(Image.Format.Rgba8);
+                    canvasImage.BlitRect(imageWallE, new Rect2I(Vector2I.Zero, imageWallE.GetSize()), rect.Position);
                     GD.Print($"Walle: ({y},{x})");
                 }
-                 else if (color != "Transparent")
+                else if (color != "Transparent")
                 {
                     canvasImage.FillRect(rect, new Color(color));
                 }
@@ -165,11 +173,12 @@ public partial class Main : Control
             yPos += rowHeight;
         }
 
-        
+
 
         canvasTexture.Update(canvasImage);
-        canvasTextureRect.Texture = canvasTexture;     
+        canvasTextureRect.Texture = canvasTexture;
         PintarCuadrícula();
+        ChangeTextPosition(canvas.GetWallEPosX(), canvas.GetWallEPosY());
     }
     private void PrintConsole(string message)
     {
@@ -180,7 +189,8 @@ public partial class Main : Control
         canvasImage.Fill(Colors.White);
         canvasTexture.Update(canvasImage);
         textOut.Text = "";
-    }   
+        ChangeTextPosition(0, 0);
+    }
     private void InicializarCanvas()
     {
         canvasImage = Image.CreateEmpty(BoardPixelSize, BoardPixelSize, false, Image.Format.Rgba8);
@@ -188,6 +198,7 @@ public partial class Main : Control
         canvasTexture = ImageTexture.CreateFromImage(canvasImage);
         canvasTextureRect.Texture = canvasTexture;
         PintarCuadrícula();
+        ChangeTextPosition(0, 0);
     }
     public void PintarCuadrícula()
     {
@@ -255,6 +266,13 @@ public partial class Main : Control
     {
         Wall_E_Paint = !Wall_E_Paint;
     }
+    private void OnDocumentationButtonPressed()
+    {
+        GD.Print("Abrir Documentación");
+        // Aquí puedes abrir la documentación en un navegador o mostrarla en un panel
+        // Por ejemplo, abrir un enlace web:
+        OS.ShellOpen("www.google.com");
+    }
     private void _OnFileDialogSaveFileSelected(string ruta)
     {
         GuardarArchivo(ruta);
@@ -266,6 +284,12 @@ public partial class Main : Control
         CargarArchivo(ruta);
         PintarCuadrícula();
         GD.Print("Archivo cargado desde: " + ruta);
+    }
+    private void ChangeTextPosition(int x, int y)
+    {
+        // Actualizar la posición del texto en el TextEdit
+        textPosition.Text = $"({x}, {y})";
+        
     }
     private void OnBoardSizeChanged(double newValue)
     {

@@ -1,6 +1,15 @@
-[gd_scene load_steps=2 format=3 uid="uid://o7sqmdr1q78m"]
+[gd_scene load_steps=5 format=3 uid="uid://o7sqmdr1q78m"]
 
 [ext_resource type="Script" path="res://scripts/Creditos.cs" id="1_kx5s2"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l0gbl"]
+bg_color = Color(0.0355588, 0.218244, 0.358472, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lnnec"]
+bg_color = Color(0.431333, 0.708906, 0.959044, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wkoxg"]
+bg_color = Color(0.0976382, 0.394226, 0.619752, 1)
 
 [node name="Creditos" type="CanvasLayer"]
 script = ExtResource("1_kx5s2")
@@ -78,5 +87,8 @@ offset_right = 113.0
 offset_bottom = -57.0
 grow_horizontal = 2
 grow_vertical = 0
+theme_override_styles/hover = SubResource("StyleBoxFlat_l0gbl")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_lnnec")
+theme_override_styles/normal = SubResource("StyleBoxFlat_wkoxg")
 text = "Back
 "
