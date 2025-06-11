@@ -39,11 +39,6 @@ namespace Wall_E.Compiler
             return pixels[y, x].Color;
         }
 
-        // Cambiar color de un píxel
-        private void SetPixelColor(int x, int y, string color)
-        {
-            pixels[y, x].Color = color;
-        }
         public int GetWallEPosX()
         {
             return Wall_E.PosX;

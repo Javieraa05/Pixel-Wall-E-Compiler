@@ -33,6 +33,7 @@ public partial class Main : Control
     private Image canvasImage;
     private ImageTexture canvasTexture;
     private TextureRect canvasTextureRect;
+    private TextureRect wallETextureRect;
     // Almacena el número actual de divisiones de la cuadrícula
     private int currentGridDivisions = 32;
 
@@ -51,7 +52,7 @@ public partial class Main : Control
         codeEdit = GetNode<CodeEdit>("HBoxContainer/EditContainer/MarginContainer/CodeEdit");
         textOut = GetNode<TextEdit>("HBoxContainer/EditContainer/MarginContainer3/TextEdit");
         textPosition = GetNode<TextEdit>("HBoxContainer/CanvasContainer/HContainer/MarginText/TextPosition");
-
+        wallETextureRect = GetNode<TextureRect>("WallEImg");
         
 
         // Conectar señales de botones
@@ -153,16 +154,31 @@ public partial class Main : Control
                 var rect = new Rect2I(new Vector2I(xPos, yPos), new Vector2I(colWidth, rowHeight));
 
                 string color = pixels[y, x].ToString();
-                if ((canvas.GetWallEPosX() == x && canvas.GetWallEPosY() == y) && Wall_E_Paint)
+                if ((canvas.GetWallEPosX() == x && canvas.GetWallEPosY() == y))
                 {
 
-                    Texture2D iconTexture = GD.Load<Texture2D>("res://Img/WallE.png");
-                    Image imageWallE= iconTexture.GetImage();
-                    imageWallE.Convert(Image.Format.Rgba8);
-                    canvasImage.BlitRect(imageWallE, new Rect2I(Vector2I.Zero, imageWallE.GetSize()), rect.Position);
+                    var iconTexture = GD.Load<Texture2D>("res://Img/WallE.png");
+                    if (iconTexture is null)
+                        GD.Print("No se cargo la imagen");
+
+                    wallETextureRect.Texture = iconTexture;
+
+                    // 3) Ignora el tamaño de la textura a la hora de calcular el mínimo
+                    wallETextureRect.ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize;  
+                    //    ↑ EXPAND_IGNORE_SIZE: la textura no impone un tamaño mínimo al control :contentReference[oaicite:0]{index=0}
+
+                    // 4) Escala la textura para que cubra todo el rectángulo
+                    wallETextureRect.StretchMode = TextureRect.StretchModeEnum.Scale;
+
+                    wallETextureRect.Size = new Vector2(colWidth, rowHeight);
+
+                    wallETextureRect.Position = new Vector2(979 + yPos, 55 + xPos);
+
+                    GD.Print($"Tamaño de la textura: {wallETextureRect.Size.X}x{wallETextureRect.Size.Y}");
+                    GD.Print($"Posición de Wall-E: {wallETextureRect.Position.X},{wallETextureRect.Position.Y}");
                     GD.Print($"Walle: ({y},{x})");
                 }
-                else if (color != "Transparent")
+                if (color != "Transparent")
                 {
                     canvasImage.FillRect(rect, new Color(color));
                 }
@@ -265,6 +281,7 @@ public partial class Main : Control
     private void OnCheckWallEPressed()
     {
         Wall_E_Paint = !Wall_E_Paint;
+        wallETextureRect.Visible = Wall_E_Paint;
     }
     private void OnDocumentationButtonPressed()
     {
@@ -301,11 +318,20 @@ public partial class Main : Control
         GD.Print("Nuevo número de divisiones: " + newSize);
     }
     // Función para guardar el contenido del editor en un archivo
-    private void GuardarArchivo(string ruta)
+    private bool GuardarArchivo(string ruta)
     {
-        var archivo = Godot.FileAccess.Open(ruta, Godot.FileAccess.ModeFlags.Write);
-        archivo.StoreString(codeEdit.GetText());
-        archivo.Close();
+        try
+        {
+            using var archivo = Godot.FileAccess.Open(ruta, Godot.FileAccess.ModeFlags.Write);
+            archivo.StoreString(codeEdit.GetText());
+            return true;
+        }
+        catch (Exception ex)
+        {
+            GD.PrintErr($"Error al guardar el archivo: {ex.Message}");
+            PrintConsole($"No se pudo guardar el archivo: {ex.Message}");
+            return false;
+        }
     }
     // Función para cargar el contenido de un archivo en el editor
     private void CargarArchivo(string ruta)

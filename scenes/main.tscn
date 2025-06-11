@@ -88,8 +88,8 @@ theme_override_constants/margin_right = 25
 custom_minimum_size = Vector2(900, 650)
 layout_mode = 2
 text = "Spawn(1,1)
-Color(\"Blue\")
-Fill()
+Color(\"Cyan\")
+DrawLine(1,1,1)
 "
 minimap_draw = true
 syntax_highlighter = SubResource("CodeHighlighter_rjj1l")
@@ -124,12 +124,12 @@ layout_mode = 2
 
 [node name="MarginText" type="MarginContainer" parent="HBoxContainer/CanvasContainer/HContainer"]
 layout_mode = 2
-theme_override_constants/margin_left = 712
+theme_override_constants/margin_left = 684
 theme_override_constants/margin_top = 15
 theme_override_constants/margin_bottom = 4
 
 [node name="TextPosition" type="TextEdit" parent="HBoxContainer/CanvasContainer/HContainer/MarginText"]
-custom_minimum_size = Vector2(55, 25)
+custom_minimum_size = Vector2(83, 25)
 layout_mode = 2
 mouse_force_pass_scroll_events = false
 editable = false
@@ -160,3 +160,11 @@ theme_override_constants/margin_bottom = 178
 custom_minimum_size = Vector2(900, 900)
 layout_mode = 2
 texture = SubResource("CanvasTexture_3px2y")
+
+[node name="WallEImg" type="TextureRect" parent="."]
+visible = false
+layout_mode = 1
+offset_left = 979.0
+offset_top = 55.0
+offset_right = 1180.0
+offset_bottom = 243.0
