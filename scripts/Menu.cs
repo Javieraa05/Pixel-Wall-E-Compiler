@@ -30,7 +30,7 @@ public partial class Menu : Node
 	}
 	private void OnButtonDocumentationPressed()
 	{
-		OS.ShellOpen("https://google.com");
+		OS.ShellOpen("https://github.com/Javieraa05/Pixel-Wall-E-Compiler");
 	}
 	private void OnButtonExitPressed()
 	{

@@ -181,7 +181,7 @@ namespace Wall_E.Compiler
 
             ValidateCoords(reSpawnStmt.Keyword, X, Y);
 
-            canvas.ReSpawnWallE(X, Y);
+            canvas.SpawnWallE(X, Y);
             // Agregamos instrucción
             instructions.Add(new Instruction(
                 InstructionType.ReSpawn,

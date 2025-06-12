@@ -34,6 +34,7 @@ public partial class Main : Control
     private ImageTexture canvasTexture;
     private TextureRect canvasTextureRect;
     private TextureRect wallETextureRect;
+    
     // Almacena el número actual de divisiones de la cuadrícula
     private int currentGridDivisions = 32;
 
@@ -156,7 +157,6 @@ public partial class Main : Control
                 string color = pixels[y, x].ToString();
                 if ((canvas.GetWallEPosX() == x && canvas.GetWallEPosY() == y))
                 {
-
                     var iconTexture = GD.Load<Texture2D>("res://Img/WallE.png");
                     if (iconTexture is null)
                         GD.Print("No se cargo la imagen");
@@ -206,6 +206,7 @@ public partial class Main : Control
         canvasTexture.Update(canvasImage);
         textOut.Text = "";
         ChangeTextPosition(0, 0);
+        PintarCuadrícula();
     }
     private void InicializarCanvas()
     {
@@ -275,8 +276,10 @@ public partial class Main : Control
     private void OnResetButtonPressed()
     {
         GD.Print("Reiniciar Canvas");
+        Wall_E_Paint = false;
+        checkWall_E.ButtonPressed = false;
+        wallETextureRect.Visible = false;
         Reset();
-        PintarCuadrícula();
     }
     private void OnCheckWallEPressed()
     {
@@ -288,7 +291,7 @@ public partial class Main : Control
         GD.Print("Abrir Documentación");
         // Aquí puedes abrir la documentación en un navegador o mostrarla en un panel
         // Por ejemplo, abrir un enlace web:
-        OS.ShellOpen("www.google.com");
+        OS.ShellOpen("https://github.com/Javieraa05/Pixel-Wall-E-Compiler");
     }
     private void _OnFileDialogSaveFileSelected(string ruta)
     {

@@ -49,10 +49,156 @@ Aquí puedes insertar tus capturas de pantalla:
 
 ## 📚 Sintaxis Completa del Lenguaje Pixel Wall-E
 
-¡Controla a Wall-E con estos comandos!  
-Cada instrucción va en una línea diferente. Los comandos se ejecutan en orden, de arriba hacia abajo.
+El lenguaje de Pixel Wall-E está compuesto por **instrucciones**, **asignaciones**, **expresiones**, **funciones**, **etiquetas** y **saltos condicionales**. Todas las instrucciones van en líneas separadas y se ejecutan de arriba hacia abajo.
 
+---
 
+### 🔧 Instrucciones
+
+#### `Spawn(int x, int y)`
+Inicializa a Wall-E en la posición `(x, y)` del canvas.  
+✅ **Debe ser la primera instrucción del programa y solo puede aparecer una vez.**
+
+#### `Color(string color)`
+Cambia el color del pincel. Valores válidos:
+
+`"Red"`, `"Blue"`, `"Green"`, `"Yellow"`, `"Orange"`, `"Purple"`, `"Black"`, `"White"`, `"Transparent"`
+
+- `"White"` puede usarse como borrador.
+- `"Transparent"` implica no pintar.
+
+#### `Size(int k)`
+Modifica el tamaño de la brocha.  
+- `k` debe ser un número impar positivo.  
+- Si es par, se usa el número impar inmediatamente menor.  
+- Valor por defecto: 1.
+
+#### `DrawLine(int dirX, int dirY, int distance)`
+Dibuja una línea desde la posición actual. Wall-E se mueve hasta el último píxel dibujado.
+
+Direcciones válidas:
+```
+(-1, -1) Diagonal arriba izquierda
+(-1,  0) Izquierda
+(-1,  1) Diagonal abajo izquierda
+( 0,  1) Abajo
+( 1,  1) Diagonal abajo derecha
+( 1,  0) Derecha
+( 1, -1) Diagonal arriba derecha
+( 0, -1) Arriba
+```
+
+#### `DrawCircle(int dirX, int dirY, int radius)`
+Dibuja un círculo con centro a `radius` de la posición actual en la dirección `(dirX, dirY)`.
+
+#### `DrawRectangle(int dirX, int dirY, int distance, int width, int height)`
+Dibuja un rectángulo. Wall-E se mueve `distance` en `(dirX, dirY)` y esa es la posición central del rectángulo.
+
+#### `Fill()`
+Rellena de color los píxeles contiguos al actual que tienen el mismo color original y no estén bloqueados por otros colores.
+
+---
+
+### 🧮 Asignaciones
+
+```pw
+variable <- expresión
+```
+
+- El nombre puede tener letras, números y espacios.
+- No puede empezar con número ni con `-`.
+- La expresión puede ser aritmética o booleana.
+
+---
+
+### ➕ Expresiones Aritméticas
+
+Componentes válidos:
+
+- Literales enteros
+- Variables numéricas
+- Funciones numéricas
+- Operaciones: `+`, `-`, `*`, `/`, `**`, `%`
+
+---
+
+### 🔁 Expresiones Booleanas
+
+- Comparaciones: `==`, `>=`, `<=`, `>`, `<`
+- Operadores:
+  - `&&` (AND)
+  - `||` (OR) → **tiene mayor precedencia que AND**
+
+---
+
+### 🧩 Funciones
+
+```pw
+x <- GetActualX()
+```
+
+Funciones disponibles:
+
+- `GetActualX()` → Coordenada X actual
+- `GetActualY()` → Coordenada Y actual
+- `GetCanvasSize()` → Lado del canvas
+- `GetColorCount(string color, int x1, y1, x2, y2)` → Cuántos píxeles del color hay entre dos esquinas
+- `IsBrushColor(string color)` → `1` si el color actual es ese
+- `IsBrushSize(int size)` → `1` si el tamaño actual coincide
+- `IsCanvasColor(string color, int vertical, int horizontal)` → Verifica el color de una casilla relativa a Wall-E
+
+---
+
+### 🏷️ Etiquetas y Saltos Condicionales
+
+#### Etiquetas
+
+Marcan una línea del código. No hacen nada por sí mismas, pero permiten hacer saltos.
+
+```pw
+loop_start
+```
+
+#### Saltos
+
+```pw
+GoTo [label] (condición)
+```
+
+- `label` debe existir en el código.
+- `condición` puede ser:
+  - Variable booleana
+  - Comparación entre literales o variables numéricas
+
+Si la condición es verdadera, el flujo salta a la etiqueta. Si es falsa, se continúa a la línea siguiente.
+
+---
+
+### 🧾 Ejemplo de Código
+
+```pw
+Spawn(0, 0)
+Color("Black")
+n <- 5
+k <- 3 + 3 * 10
+n <- k * 2
+actual_x <- GetActualX()
+i <- 0
+
+loop1
+DrawLine(1, 0, 1)
+i <- i + 1
+is_blue <- IsBrushColor("Blue")
+GoTo [loop_end] (is_blue == 1)
+GoTo [loop1] (i < 10)
+
+Color("Blue")
+GoTo [loop1] (1 == 1)
+
+loop_end
+```
+
+---
 
 ## 🛠️ Guía Rápida de Uso
 
@@ -80,26 +226,10 @@ Cada instrucción va en una línea diferente. Los comandos se ejecutan en orden,
 
 ---
 
-## 📝 Ejemplo Completo
-
-```pw
-// Dibuja un cuadrado rojo en el centro
-Spawn(16, 16)
-Color("Red")
-Size(3)
-DrawLine(1, 0, 8)
-DrawLine(0, 1, 8)
-DrawLine(-1, 0, 8)
-DrawLine(0, -1, 8)
-```
-
----
-
 ## 🏷️ Créditos
 
 - Desarrollado por Javier Aristigui Aguilar.
 - 2do Proyecto de Programacion, Ciencias de la Computación, MATCOM 2024-2025.
-  
 
 ---
 
@@ -116,4 +246,4 @@ DrawLine(0, -1, 8)
 
 ---
 
-¡Diviértete programando y creando arte con Wall-E!  
+¡Diviértete programando y creando arte con Wall-E!

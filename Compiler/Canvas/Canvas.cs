@@ -58,10 +58,6 @@ namespace Wall_E.Compiler
             Wall_E.MoveTo(x, y);
         }
         
-        public void ReSpawnWallE(int x, int y)
-        {
-            Wall_E.MoveTo(x, y);
-        }
 
         /// <summary>
         /// Dibuja una línea desde la posición actual de Wall-E, 
@@ -87,7 +83,7 @@ namespace Wall_E.Compiler
                 PaintAt(x, y, Wall_E.BrushSize, Wall_E.BrushColor);
             }
 
-            Wall_E.MoveTo(x+dirY, y+dirX);
+            Wall_E.MoveTo(x + Wall_E.BrushSize/2, y + Wall_E.BrushSize/2);
 
         }
 
