@@ -6,4 +6,9 @@
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <RootNamespace>PixelWallECompiler</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PixelWallE.Compiler">
+      <HintPath>Lib/PixelWallECompiler.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

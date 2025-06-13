@@ -14,10 +14,6 @@ namespace Wall_E.Compiler
     public class ProgramNode : ASTNode
     {
         public List<Stmt> Statements { get; } = new List<Stmt>();
-        public void Execute(Interpreter interpreter)
-        {
-           
-        }
     }
 
     public class AstTreePrinter

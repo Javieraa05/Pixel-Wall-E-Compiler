@@ -162,8 +162,12 @@ namespace Wall_E.Compiler
 
     public class FillStmt : Stmt
     {
-        public FillStmt()
-        { }
+        public Token Keyword;
+
+        public FillStmt(Token token)
+        {
+            Keyword = token;
+        }
 
         public override T Accept<T>(IStmtVisitor<T> visitor)
         {

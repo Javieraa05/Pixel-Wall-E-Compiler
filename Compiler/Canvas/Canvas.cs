@@ -1,7 +1,7 @@
 using System.Drawing;
 using System;
 using System.Collections.Generic;
-using Godot;
+
 
 namespace Wall_E.Compiler
 {
@@ -139,9 +139,6 @@ namespace Wall_E.Compiler
 
             int startX = Wall_E.PosX - width / 2;
             int startY = Wall_E.PosY - height / 2;
-
-            GD.Print($"Empezar rectangulo en ({startX},{startY})");
-
 
             // Dibujar bordes: 4 líneas
             // Línea superior

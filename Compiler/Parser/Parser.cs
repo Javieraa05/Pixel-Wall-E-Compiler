@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Godot;
+
 
 namespace Wall_E.Compiler
 {
@@ -30,7 +30,6 @@ namespace Wall_E.Compiler
         { TokenType.IsBrushColor, 1 },
         { TokenType.IsBrushSize,  1 },
         { TokenType.IsCanvasColor,3 },
-
     };
 
         public Parser(List<Token> tokens)
@@ -184,7 +183,7 @@ namespace Wall_E.Compiler
                 TokenType.DrawLine => new DrawLineStmt(keyword, args[0], args[1], args[2]),
                 TokenType.DrawCircle => new DrawCircleStmt(keyword, args[0], args[1], args[2]),
                 TokenType.DrawRectangle => new DrawRectangleStmt(keyword, args[0], args[1], args[2], args[3], args[4]),
-                TokenType.Fill => new FillStmt(),
+                TokenType.Fill => new FillStmt(keyword),
                 TokenType.GetActualX => new GetActualXExpr(),
                 TokenType.GetActualY => new GetActualYExpr(),
                 TokenType.GetCanvasSize => new GetCanvasSizeExpr(),

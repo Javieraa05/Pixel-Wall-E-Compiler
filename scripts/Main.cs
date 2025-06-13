@@ -13,12 +13,12 @@ public partial class Main : Control
     private Button resetButton;
     private Button documentationButton;
     private bool Wall_E_Paint = false;
-    
+
     // Nodo del editor de código
     private CodeEdit codeEdit;
     private TextEdit textOut;
     private TextEdit textPosition;
-    
+
     // FileDialogs para guardar y cargar archivos
     private FileDialog fileDialogSave;
     private FileDialog fileDialogLoad;
@@ -34,7 +34,7 @@ public partial class Main : Control
     private ImageTexture canvasTexture;
     private TextureRect canvasTextureRect;
     private TextureRect wallETextureRect;
-    
+
     // Almacena el número actual de divisiones de la cuadrícula
     private int currentGridDivisions = 32;
 
@@ -54,7 +54,7 @@ public partial class Main : Control
         textOut = GetNode<TextEdit>("HBoxContainer/EditContainer/MarginContainer3/TextEdit");
         textPosition = GetNode<TextEdit>("HBoxContainer/CanvasContainer/HContainer/MarginText/TextPosition");
         wallETextureRect = GetNode<TextureRect>("WallEImg");
-        
+
 
         // Conectar señales de botones
         boardSizeSpinBox.ValueChanged += OnBoardSizeChanged;
@@ -89,7 +89,7 @@ public partial class Main : Control
         fileDialogLoad.FileSelected += _OnFileDialogLoadFileSelected;
     }
 
-  
+
     private void Compiler()
     {
         // Obtener el código del editor
@@ -151,32 +151,15 @@ public partial class Main : Control
             int xPos = 0;
             for (int x = 0; x < divs; x++)
             {
+                // Altura de esta columna:
                 int colWidth = (x < remW) ? baseW + 1 : baseW;
                 var rect = new Rect2I(new Vector2I(xPos, yPos), new Vector2I(colWidth, rowHeight));
 
                 string color = pixels[y, x].ToString();
+
                 if ((canvas.GetWallEPosX() == x && canvas.GetWallEPosY() == y))
                 {
-                    var iconTexture = GD.Load<Texture2D>("res://Img/WallE.png");
-                    if (iconTexture is null)
-                        GD.Print("No se cargo la imagen");
-
-                    wallETextureRect.Texture = iconTexture;
-
-                    // 3) Ignora el tamaño de la textura a la hora de calcular el mínimo
-                    wallETextureRect.ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize;  
-                    //    ↑ EXPAND_IGNORE_SIZE: la textura no impone un tamaño mínimo al control :contentReference[oaicite:0]{index=0}
-
-                    // 4) Escala la textura para que cubra todo el rectángulo
-                    wallETextureRect.StretchMode = TextureRect.StretchModeEnum.Scale;
-
-                    wallETextureRect.Size = new Vector2(colWidth, rowHeight);
-
-                    wallETextureRect.Position = new Vector2(979 + yPos, 55 + xPos);
-
-                    GD.Print($"Tamaño de la textura: {wallETextureRect.Size.X}x{wallETextureRect.Size.Y}");
-                    GD.Print($"Posición de Wall-E: {wallETextureRect.Position.X},{wallETextureRect.Position.Y}");
-                    GD.Print($"Walle: ({y},{x})");
+                    LoadWallE(y, x, colWidth, rowHeight, Wall_E_Paint);
                 }
                 if (color != "Transparent")
                 {
@@ -206,7 +189,7 @@ public partial class Main : Control
         canvasTexture.Update(canvasImage);
         textOut.Text = "";
         ChangeTextPosition(0, 0);
-        PintarCuadrícula();
+        LoadWallE(0, 0, BoardPixelSize / currentGridDivisions, BoardPixelSize / currentGridDivisions, false);
     }
     private void InicializarCanvas()
     {
@@ -253,7 +236,7 @@ public partial class Main : Control
         canvasTexture.Update(canvasImage);
         canvasTextureRect.Texture = canvasTexture;
     }
-     private void OnRunButtonPressed()
+    private void OnRunButtonPressed()
     {
         Compiler();
     }
@@ -280,10 +263,11 @@ public partial class Main : Control
         checkWall_E.ButtonPressed = false;
         wallETextureRect.Visible = false;
         Reset();
+        PintarCuadrícula();
     }
     private void OnCheckWallEPressed()
     {
-        Wall_E_Paint = !Wall_E_Paint;
+        Wall_E_Paint = checkWall_E.ButtonPressed;
         wallETextureRect.Visible = Wall_E_Paint;
     }
     private void OnDocumentationButtonPressed()
@@ -309,7 +293,7 @@ public partial class Main : Control
     {
         // Actualizar la posición del texto en el TextEdit
         textPosition.Text = $"({x}, {y})";
-        
+
     }
     private void OnBoardSizeChanged(double newValue)
     {
@@ -344,5 +328,30 @@ public partial class Main : Control
         string contenido = archivo.GetAsText();
         archivo.Close();
         codeEdit.SetText(contenido);
+        PintarCuadrícula();
+    }
+    private void LoadWallE(int x, int y, int sizeX, int sizeY, bool state)
+    {
+        var iconTexture = GD.Load<Texture2D>("res://Img/WallE.png");
+        if (iconTexture is null)
+            GD.Print("No se cargo la imagen");
+
+        wallETextureRect.Texture = iconTexture;
+
+        //Ignora el tamaño de la textura a la hora de calcular el mínimo
+        wallETextureRect.ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize;
+        //    ↑ EXPAND_IGNORE_SIZE: la textura no impone un tamaño mínimo al control :contentReference[oaicite:0]{index=0}
+
+        //Escala la textura para que cubra todo el rectángulo
+        wallETextureRect.StretchMode = TextureRect.StretchModeEnum.Scale;
+
+        wallETextureRect.Size = new Vector2(sizeX, sizeY);
+
+        wallETextureRect.Position = new Vector2(979 + x*sizeX, 55 + y*sizeY);
+        wallETextureRect.Visible = state;
+
+        GD.Print($"Tamaño de la textura: {wallETextureRect.Size.X}x{wallETextureRect.Size.Y}");
+        GD.Print($"Posición de Wall-E: {wallETextureRect.Position.X},{wallETextureRect.Position.Y}");
+        GD.Print($"Walle: ({x},{y})");
     }
 }

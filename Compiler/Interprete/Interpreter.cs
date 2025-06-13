@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Godot;
+
 
 namespace Wall_E.Compiler
 {
@@ -32,8 +32,9 @@ namespace Wall_E.Compiler
         /// </summary>
         public void Interpret(ProgramNode programNode)
         {
-             hadRuntimeError = false;
+            hadRuntimeError = false;
             labelTable.Clear();
+            
             // 1) Primer pase: indexar todas las etiquetas
             var stmts = programNode.Statements;
             for (int i = 0; i < stmts.Count; i++)
@@ -60,7 +61,7 @@ namespace Wall_E.Compiler
             {
                 Stmt stmt = stmts[current];
 
-                GD.Print($"[Interpret] Paso {steps}, índice {current}, stmt = {stmt.GetType().Name}");
+               // GD.Print($"[Interpret] Paso {steps}, índice {current}, stmt = {stmt.GetType().Name}");
 
                 try
                 {
@@ -73,7 +74,7 @@ namespace Wall_E.Compiler
                         object condValue = SafeEvaluate(goTo.Condition);
                         bool truthy = IsTruthy(condValue);
 
-                        GD.Print($"[Interpret] Paso {steps}, índice {current}, stmt = {stmt.GetType().Name}");
+                       // GD.Print($"[Interpret] Paso {steps}, índice {current}, stmt = {stmt.GetType().Name}");
 
                         if (truthy)
                         {
@@ -90,7 +91,7 @@ namespace Wall_E.Compiler
                                 throw new RuntimeError(id.Name.Line, id.Name.Column,
                                     $"Etiqueta '{labelName}' no encontrada.");
                             }
-                            GD.Print($"[GoTo] Saltando de {current} a etiqueta '{labelName}' en {targetIndex}");
+                          //  GD.Print($"[GoTo] Saltando de {current} a etiqueta '{labelName}' en {targetIndex}");
                             // Salto: seteamos current a targetIndex
                             current = targetIndex;
                             continue; // no avanzamos current++, porque ya lo modificamos
@@ -114,7 +115,7 @@ namespace Wall_E.Compiler
                 }
                 catch (RuntimeError rte)
                 {
-                    GD.Print($"[RuntimeError] Línea {rte.Line}, Col {rte.Column}: {rte.Message}");
+                   // GD.Print($"[RuntimeError] Línea {rte.Line}, Col {rte.Column}: {rte.Message}");
                     hadRuntimeError = true;
                     runtimeErrors.Add(rte);
                     //Si hubo un error, lo registramos y continuamos con la siguiente sentencia
@@ -295,10 +296,17 @@ namespace Wall_E.Compiler
         }
         public object VisitFillStmt(FillStmt fillStmt)
         {
-            canvas.Fill();
-            instructions.Add(new Instruction(
-            InstructionType.Fill
-            ));
+            try
+            {
+                canvas.Fill();
+                instructions.Add(new Instruction(
+                InstructionType.Fill
+                ));
+            }
+            catch
+            {
+                throw new RuntimeError(fillStmt.Keyword.Line, fillStmt.Keyword.Column, " Coordenadas invalidas");
+            }
             
             return null;
         }
@@ -573,7 +581,7 @@ namespace Wall_E.Compiler
                 // Como no podemos devolver un int válido, relanzamos RuntimeError:
                 throw rte;
             }
-            catch (RuntimeError rte)
+            catch (RuntimeError)
             {
                 hadRuntimeError = true;
                 // Relanzamos para que el VisitXXXStmt lo capture antes de castear:
@@ -623,7 +631,7 @@ namespace Wall_E.Compiler
         {
             int temX = canvas.GetWallEPosX()+dirX*distance;
             int temY = canvas.GetWallEPosY()+dirY*distance;
-            GD.Print($"({temX},{temY})");
+            
             ValidateCoords(operatorToken, temX, temY);
             
         }
@@ -640,7 +648,7 @@ namespace Wall_E.Compiler
         }
         public void ValidateCoords(Token Keyword, int X, int Y)
         {
-            if (X < 0 || X > canvas.Size || Y < 0 || Y > canvas.Size)
+            if (X < 0 || X >= canvas.Size || Y < 0 || Y >= canvas.Size)
                 throw new RuntimeError(Keyword.Line, Keyword.Column, $"Coordenadas fuera de rango: ({X}, {Y})");
         }
     }
