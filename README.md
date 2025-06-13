@@ -59,6 +59,9 @@ El lenguaje de Pixel Wall-E está compuesto por **instrucciones**, **asignacione
 Inicializa a Wall-E en la posición `(x, y)` del canvas.  
 ✅ **Debe ser la primera instrucción del programa y solo puede aparecer una vez.**
 
+#### `ReSpawn(int x, int y)`
+Mueve a Wall-E a la posición `(x, y)` del canvas.  
+
 #### `Color(string color)`
 Cambia el color del pincel. Valores válidos:
 
