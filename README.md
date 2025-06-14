@@ -59,6 +59,9 @@ El lenguaje de Pixel Wall-E está compuesto por **instrucciones**, **asignacione
 Inicializa a Wall-E en la posición `(x, y)` del canvas.  
 ✅ **Debe ser la primera instrucción del programa y solo puede aparecer una vez.**
 
+#### `ReSpawn(int x, int y)`
+Mueve a Wall-E a la posición `(x, y)` del canvas.  
+
 #### `Color(string color)`
 Cambia el color del pincel. Valores válidos:
 
@@ -142,7 +145,7 @@ Funciones disponibles:
 - `GetActualX()` → Coordenada X actual
 - `GetActualY()` → Coordenada Y actual
 - `GetCanvasSize()` → Lado del canvas
-- `GetColorCount(string color, int x1, y1, x2, y2)` → Cuántos píxeles del color hay entre dos esquinas
+- `GetColorCount(string color, int x1, y1, x2, y2)` → Cuántos píxeles del color hay dentro del cuadrado formado por las dos esquinas
 - `IsBrushColor(string color)` → `1` si el color actual es ese
 - `IsBrushSize(int size)` → `1` si el tamaño actual coincide
 - `IsCanvasColor(string color, int vertical, int horizontal)` → Verifica el color de una casilla relativa a Wall-E
