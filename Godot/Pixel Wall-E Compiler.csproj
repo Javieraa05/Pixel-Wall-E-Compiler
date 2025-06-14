@@ -1,0 +1,11 @@
+<Project Sdk="Godot.NET.Sdk/4.3.0">
+  <ItemGroup>
+    <ProjectReference Include="..\WallE_Compiler_Lib\WallE_Compiler_Lib.csproj" />
+  </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <RootNamespace>PixelWallECompiler</RootNamespace>
+  </PropertyGroup>
+
+</Project>

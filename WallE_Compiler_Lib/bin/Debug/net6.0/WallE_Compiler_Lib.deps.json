@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v6.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v6.0": {
+      "WallE_Compiler_Lib/1.0.0": {
+        "runtime": {
+          "WallE_Compiler_Lib.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "WallE_Compiler_Lib/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
