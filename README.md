@@ -20,8 +20,9 @@ Aquí puedes insertar tus capturas de pantalla:
 3. Mensajes de error amigables
 -->
 
-![Pantalla principal](docs/img/main_screen.png)
-![Ejemplo de dibujo](docs/img/example_art.png)
+![Pantalla principal](Img/Captura de pantalla3.png)
+![Ejemplo de dibujo](Img/Captura de pantalla1.png)
+![Ejemplo de dibujo](Img/Captura de pantalla2.png)
 
 ---
 
