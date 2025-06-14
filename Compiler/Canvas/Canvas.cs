@@ -47,7 +47,10 @@ namespace Wall_E.Compiler
         {
             return Wall_E.PosY;
         }
-
+        public int GetBrushSize()
+        {
+            return Wall_E.BrushSize;
+        }
 
 
         /// <summary>
@@ -76,8 +79,8 @@ namespace Wall_E.Compiler
             for (int step = 0; step < distance; step++)
             {
                 // Avanzar un paso en la dirección
-                x += dirY;
-                y += dirX;
+                x += dirX;
+                y += dirY;
 
                 // Pintar un bloque de BrushSize × BrushSize centrado en (x,y)
                 PaintAt(x, y, Wall_E.BrushSize, Wall_E.BrushColor);

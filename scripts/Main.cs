@@ -36,7 +36,7 @@ public partial class Main : Control
     private TextureRect wallETextureRect;
 
     // Almacena el número actual de divisiones de la cuadrícula
-    private int currentGridDivisions = 32;
+    private int currentGridDivisions = 37;
 
 
     public override void _Ready()
@@ -87,6 +87,7 @@ public partial class Main : Control
         fileDialogLoad.Filters = new string[] { "*.gw" };
         AddChild(fileDialogLoad);
         fileDialogLoad.FileSelected += _OnFileDialogLoadFileSelected;
+        Compiler();
     }
 
 
@@ -142,43 +143,45 @@ public partial class Main : Control
         int baseH = BoardPixelSize / divs;
         int remH = BoardPixelSize % divs;
 
-        int yPos = 0;
-        for (int y = 0; y < divs; y++)
+        int xPos = 0; // posicion de las filas
+        for (int x = 0; x < divs; x++)
         {
-            // Altura de esta fila:
-            int rowHeight = (y < remH) ? baseH + 1 : baseH;
+            int alturaFila = (x < remH) ? baseH + 1 : baseH;
+            int yPos = 0; // posicion de las columnas
 
-            int xPos = 0;
-            for (int x = 0; x < divs; x++)
+            for (int y = 0; y < divs; y++)
             {
-                // Altura de esta columna:
-                int colWidth = (x < remW) ? baseW + 1 : baseW;
-                var rect = new Rect2I(new Vector2I(xPos, yPos), new Vector2I(colWidth, rowHeight));
+                int anchuraColumna = (y < remW) ? baseW + 1 : baseW;
 
-                string color = pixels[y, x].ToString();
+                // Rect2I(posición (x,y), tamaño (ancho,alto))
+                var rect = new Rect2I(
+                    new Vector2I(yPos, xPos),
+                    new Vector2I(anchuraColumna, alturaFila)
+                );
 
-                if ((canvas.GetWallEPosX() == x && canvas.GetWallEPosY() == y))
+                string color = pixels[x, y].ToString();
+                if (canvas.GetWallEPosX() == x && canvas.GetWallEPosY() == y)
                 {
-                    LoadWallE(y, x, colWidth, rowHeight, Wall_E_Paint);
+                    LoadWallE(yPos, xPos, alturaFila, anchuraColumna, Wall_E_Paint);
                 }
                 if (color != "Transparent")
                 {
                     canvasImage.FillRect(rect, new Color(color));
                 }
-
-                xPos += colWidth;
+                
+                yPos += anchuraColumna; // muevo abajo
             }
 
-            yPos += rowHeight;
+            xPos += alturaFila; // bajo a la derecha
         }
-
-
 
         canvasTexture.Update(canvasImage);
         canvasTextureRect.Texture = canvasTexture;
         PintarCuadrícula();
         ChangeTextPosition(canvas.GetWallEPosX(), canvas.GetWallEPosY());
     }
+
+
     private void PrintConsole(string message)
     {
         textOut.Text = message;
@@ -275,7 +278,7 @@ public partial class Main : Control
         GD.Print("Abrir Documentación");
         // Aquí puedes abrir la documentación en un navegador o mostrarla en un panel
         // Por ejemplo, abrir un enlace web:
-        OS.ShellOpen("https://github.com/Javieraa05/Pixel-Wall-E-Compiler");
+        OS.ShellOpen("https://github.com/Javieraa05/Pixel-Wall-E-Compiler?tab=readme-ov-file#-pixel-wall-e-programa-y-dibuja-con-tu-robot-favorito-");
     }
     private void _OnFileDialogSaveFileSelected(string ruta)
     {
@@ -347,11 +350,17 @@ public partial class Main : Control
 
         wallETextureRect.Size = new Vector2(sizeX, sizeY);
 
-        wallETextureRect.Position = new Vector2(979 + x*sizeX, 55 + y*sizeY);
+        wallETextureRect.Position = new Vector2(979 + x, 55 + y);
         wallETextureRect.Visible = state;
-
-        GD.Print($"Tamaño de la textura: {wallETextureRect.Size.X}x{wallETextureRect.Size.Y}");
-        GD.Print($"Posición de Wall-E: {wallETextureRect.Position.X},{wallETextureRect.Position.Y}");
-        GD.Print($"Walle: ({x},{y})");
     }
+    public override void _Process(double delta)
+    {
+        if (Input.IsActionPressed("run"))
+        {
+            GD.Print("Ejecutando código...");
+            Compiler();
+        }
+
+    }
+
 }

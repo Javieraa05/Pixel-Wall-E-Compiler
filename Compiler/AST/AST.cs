@@ -4,18 +4,27 @@ using System.Text;
 
 namespace Wall_E.Compiler
 {
-    // Definición de nodos del Árbol de Sintaxis Abstracta (AST)
+    /// <summary>
+    /// Clase base abstracta para todos los nodos del Árbol de Sintaxis Abstracta (AST).
+    /// </summary>
     public abstract class ASTNode
     {
-
     }
 
-    // Nodo raíz que contiene una lista de sentencias
+    /// <summary>
+    /// Nodo raíz del AST que contiene la lista de sentencias del programa.
+    /// </summary>
     public class ProgramNode : ASTNode
     {
+        /// <summary>
+        /// Lista de sentencias que conforman el programa.
+        /// </summary>
         public List<Stmt> Statements { get; } = new List<Stmt>();
     }
 
+    /// <summary>
+    /// Clase para imprimir el Árbol de Sintaxis Abstracta (AST) en forma de árbol legible.
+    /// </summary>
     public class AstTreePrinter
     {
         private StringBuilder? _builder;
@@ -23,6 +32,11 @@ namespace Wall_E.Compiler
         private const string Branch = "├── ";
         private const string LastBranch = "└── ";
 
+        /// <summary>
+        /// Imprime el AST a partir de la raíz proporcionada.
+        /// </summary>
+        /// <param name="root">Nodo raíz del AST.</param>
+        /// <returns>Una cadena de texto que representa el AST.</returns>
         public string Print(ASTNode root)
         {
             _builder = new StringBuilder();
@@ -30,6 +44,12 @@ namespace Wall_E.Compiler
             return _builder.ToString();
         }
 
+        /// <summary>
+        /// Visita recursivamente los nodos del AST y agrega cada nodo al StringBuilder con la indentación adecuada.
+        /// </summary>
+        /// <param name="node">Nodo actual a visitar.</param>
+        /// <param name="indent">Indentación acumulada para el nodo actual.</param>
+        /// <param name="isLast">Indica si el nodo es el último hijo en su nivel.</param>
         private void VisitNode(ASTNode node, string indent, bool isLast)
         {
             var connector = isLast ? LastBranch : Branch;
@@ -37,6 +57,7 @@ namespace Wall_E.Compiler
 
             var children = new List<ASTNode>();
 
+            // Se agregan los hijos del nodo actual según su tipo.
             switch (node)
             {
                 case ProgramNode program:
@@ -114,9 +135,9 @@ namespace Wall_E.Compiler
                     children.Add(reSpawnStmt.ExprX);
                     children.Add(reSpawnStmt.ExprY);
                     break;
-            
             }
 
+            // Visita recursivamente cada uno de los nodos hijos.
             for (int i = 0; i < children.Count; i++)
             {
                 var child = children[i];
@@ -126,6 +147,11 @@ namespace Wall_E.Compiler
             }
         }
 
+        /// <summary>
+        /// Devuelve una etiqueta descriptiva para el nodo del AST.
+        /// </summary>
+        /// <param name="node">Nodo del AST.</param>
+        /// <returns>Una cadena que describe el tipo y algunos atributos del nodo.</returns>
         private string GetLabel(ASTNode node)
         {
             return node switch
@@ -142,12 +168,5 @@ namespace Wall_E.Compiler
                 _ => node.GetType().Name
             };
         }
-
     }
 }
-
-
-
-
-
-

@@ -30,7 +30,7 @@ public partial class Menu : Node
 	}
 	private void OnButtonDocumentationPressed()
 	{
-		OS.ShellOpen("https://github.com/Javieraa05/Pixel-Wall-E-Compiler");
+		OS.ShellOpen("https://github.com/Javieraa05/Pixel-Wall-E-Compiler?tab=readme-ov-file#-pixel-wall-e-programa-y-dibuja-con-tu-robot-favorito-");
 	}
 	private void OnButtonExitPressed()
 	{
