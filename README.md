@@ -31,7 +31,7 @@ Aquí puedes insertar tus capturas de pantalla:
 ### 1. Descarga y ejecuta
 
 1. Clona este repositorio.
-2. Ve a la carpeta `release/` y descomprime el archivo `.zip` que contiene el ejecutable (`PixelWallE.exe`).
+2. Ve a la carpeta `Executable/` y descomprime el archivo `.zip` que contiene el ejecutable (`PixelWallE.exe`).
 3. ¡Haz doble clic en `PixelWallE.exe` y comienza a crear tu arte!
 
 > **Nota:** No necesitas instalar nada adicional. ¡Solo clona, descomprime y ejecuta!
