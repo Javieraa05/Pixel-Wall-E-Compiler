@@ -13,7 +13,7 @@ config_version=5
 config/name="Pixel Wall-E Compiler"
 run/main_scene="res://scenes/menu.tscn"
 config/features=PackedStringArray("4.3", "C#", "Forward Plus")
-config/icon="res://icon.svg"
+config/icon="res://Img/Icon.png"
 
 [display]
 
