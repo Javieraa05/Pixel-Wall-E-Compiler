@@ -229,9 +229,6 @@ loop_end
 - Si ocurre un error (por ejemplo, si te sales del canvas), Pixel Wall-E te avisará con un mensaje claro.
 
 ---
-## Documentación técnica
-
-- (InformeTecnico_WallECompiler.md)
 
 ## 🏷️ Créditos
 
