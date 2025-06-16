@@ -27,7 +27,7 @@ namespace Wall_E.Compiler
 
         public override string ToString()
         {
-            return $"[{Kind}] Línea {Line}, Col {Column}: {Message}";
+            return $"[Error] Línea {Line}, Col {Column}: {Message}";
         }
     }
 }

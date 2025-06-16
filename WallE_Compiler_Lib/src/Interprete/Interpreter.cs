@@ -213,8 +213,8 @@ namespace Wall_E.Compiler
         {
             try
             {
-                var X = (int)SafeEvaluate(spawnStmt.ExprX);
-                var Y = (int)SafeEvaluate(spawnStmt.ExprY);
+                var Y = (int)SafeEvaluate(spawnStmt.ExprX);
+                var X = (int)SafeEvaluate(spawnStmt.ExprY);
                 ValidateCoords(spawnStmt.Keyword, X, Y);
 
                 canvas.SpawnWallE(X, Y);
@@ -240,8 +240,8 @@ namespace Wall_E.Compiler
         {
             try
             {
-                var X = (int)SafeEvaluate(reSpawnStmt.ExprX);
-                var Y = (int)SafeEvaluate(reSpawnStmt.ExprY);
+                var Y = (int)SafeEvaluate(reSpawnStmt.ExprX);
+                var X = (int)SafeEvaluate(reSpawnStmt.ExprY);
 
                 ValidateCoords(reSpawnStmt.Keyword, X, Y);
 
@@ -327,8 +327,8 @@ namespace Wall_E.Compiler
         {
             try
             {
-                var dirX = (int)SafeEvaluate(drawLineStmt.DirX);
-                var dirY = (int)SafeEvaluate(drawLineStmt.DirY);
+                var dirY = (int)SafeEvaluate(drawLineStmt.DirX);
+                var dirX = (int)SafeEvaluate(drawLineStmt.DirY);
                 var distance = (int)SafeEvaluate(drawLineStmt.Distance);
                 CheckValidDirection(drawLineStmt.Keyword, dirX, dirY);
                 if (distance < 0)
@@ -357,8 +357,8 @@ namespace Wall_E.Compiler
         {
             try
             {
-                var dirX = (int)SafeEvaluate(drawCircleStmt.DirX);
-                var dirY = (int)SafeEvaluate(drawCircleStmt.DirY);
+                var dirY = (int)SafeEvaluate(drawCircleStmt.DirX);
+                var dirX = (int)SafeEvaluate(drawCircleStmt.DirY);
                 var radius = (int)SafeEvaluate(drawCircleStmt.Radius);
                 CheckValidDirection(drawCircleStmt.Keyword, dirX, dirY);
 
@@ -388,11 +388,11 @@ namespace Wall_E.Compiler
         {
             try
             {
-                var dirX = (int)SafeEvaluate(drawRectangleStmt.DirX);
-                var dirY = (int)SafeEvaluate(drawRectangleStmt.DirY);
+                var dirY = (int)SafeEvaluate(drawRectangleStmt.DirX);
+                var dirX = (int)SafeEvaluate(drawRectangleStmt.DirY);
                 var distance = (int)SafeEvaluate(drawRectangleStmt.Distance);
-                var width = (int)SafeEvaluate(drawRectangleStmt.Width);
-                var height = (int)SafeEvaluate(drawRectangleStmt.Height);
+                var height = (int)SafeEvaluate(drawRectangleStmt.Width);
+                var width = (int)SafeEvaluate(drawRectangleStmt.Height);
 
                 CheckValidDirection(drawRectangleStmt.Keyword, dirX, dirY);
                 if (width < 1 || height < 1 || distance < 0)
@@ -440,7 +440,7 @@ namespace Wall_E.Compiler
         /// </summary>
         public object VisitGetActualXExpr(GetActualXExpr getActualXNode)
         {
-            return canvas.GetWallEPosX();
+            return canvas.GetWallEPosY();
         }
 
         /// <summary>
@@ -448,7 +448,7 @@ namespace Wall_E.Compiler
         /// </summary>
         public object VisitGetActualYExpr(GetActualYExpr getActualYNode)
         {
-            return canvas.GetWallEPosY();
+            return canvas.GetWallEPosX();
         }
 
         /// <summary>
@@ -560,8 +560,8 @@ namespace Wall_E.Compiler
         {
             try
             {
-                var v = (int)SafeEvaluate(isCanvasColorNode.Vertical) + canvas.GetWallEPosY();
-                var h = (int)SafeEvaluate(isCanvasColorNode.Horizontal) + canvas.GetWallEPosX();
+                var h = (int)SafeEvaluate(isCanvasColorNode.Vertical) + canvas.GetWallEPosY();
+                var v = (int)SafeEvaluate(isCanvasColorNode.Horizontal) + canvas.GetWallEPosX();
 
                 try
                 {

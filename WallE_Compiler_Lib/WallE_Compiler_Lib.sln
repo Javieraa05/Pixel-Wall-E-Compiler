@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WallE_Compiler_Lib", "WallE_Compiler_Lib.csproj", "{CA6A6FFB-1805-610E-D8E9-818BE2BFE5F3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CA6A6FFB-1805-610E-D8E9-818BE2BFE5F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA6A6FFB-1805-610E-D8E9-818BE2BFE5F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA6A6FFB-1805-610E-D8E9-818BE2BFE5F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA6A6FFB-1805-610E-D8E9-818BE2BFE5F3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5F1D4AF5-6958-4531-925B-DEB845C5B896}
+	EndGlobalSection
+EndGlobal

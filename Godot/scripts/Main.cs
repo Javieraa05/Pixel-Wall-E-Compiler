@@ -12,6 +12,7 @@ public partial class Main : Control
     private Button checkWall_E;
     private Button resetButton;
     private Button documentationButton;
+    private Button saveCanvasButton;
     private bool Wall_E_Paint = false;
 
     // Nodo del editor de código
@@ -44,12 +45,16 @@ public partial class Main : Control
         // Obtén las referencias a los nodos hijos
         boardSizeSpinBox = GetNode<SpinBox>("HBoxContainer/EditContainer/MarginContainer2/ButtonContainer/SpinBox");
         canvasTextureRect = GetNode<TextureRect>("HBoxContainer/CanvasContainer/Canvas/TextureRect");
+
         saveButton = GetNode<Button>("HBoxContainer/EditContainer/MarginContainer2/ButtonContainer/Save");
         loadButton = GetNode<Button>("HBoxContainer/EditContainer/MarginContainer2/ButtonContainer/Load");
         runButton = GetNode<Button>("HBoxContainer/EditContainer/MarginContainer2/ButtonContainer/Run");
         resetButton = GetNode<Button>("HBoxContainer/EditContainer/MarginContainer2/ButtonContainer/Reset");
         checkWall_E = GetNode<Button>("HBoxContainer/EditContainer/MarginContainer2/ButtonContainer/CheckWallE");
-        documentationButton = GetNode<Button>("HBoxContainer/CanvasContainer/HContainer/MarginButtom/Documentation");
+
+        saveCanvasButton = GetNode<Button>("HBoxContainer/CanvasContainer/HContainer/MarginButtonS/SaveCanvas");
+        documentationButton = GetNode<Button>("HBoxContainer/CanvasContainer/HContainer/MarginButtonD/Documentation");
+
         codeEdit = GetNode<CodeEdit>("HBoxContainer/EditContainer/MarginContainer/CodeEdit");
         textOut = GetNode<TextEdit>("HBoxContainer/EditContainer/MarginContainer3/TextEdit");
         textPosition = GetNode<TextEdit>("HBoxContainer/CanvasContainer/HContainer/MarginText/TextPosition");
@@ -64,6 +69,7 @@ public partial class Main : Control
         checkWall_E.Pressed += OnCheckWallEPressed;
         resetButton.Pressed += OnResetButtonPressed;
         documentationButton.Pressed += OnDocumentationButtonPressed;
+        saveCanvasButton.Pressed += OnSaveCanvasButtonPressed;
 
         // Inicializa el canvas (imagen) y la textura
         InicializarCanvas();
@@ -143,6 +149,7 @@ public partial class Main : Control
         int baseH = BoardPixelSize / divs;
         int remH = BoardPixelSize % divs;
 
+
         int xPos = 0; // posicion de las filas
         for (int x = 0; x < divs; x++)
         {
@@ -151,6 +158,7 @@ public partial class Main : Control
 
             for (int y = 0; y < divs; y++)
             {
+                
                 int anchuraColumna = (y < remW) ? baseW + 1 : baseW;
 
                 // Rect2I(posición (x,y), tamaño (ancho,alto))
@@ -168,20 +176,20 @@ public partial class Main : Control
                 {
                     canvasImage.FillRect(rect, new Color(color));
                 }
-                
+
                 yPos += anchuraColumna; // muevo abajo
             }
 
+            
             xPos += alturaFila; // bajo a la derecha
         }
 
         canvasTexture.Update(canvasImage);
         canvasTextureRect.Texture = canvasTexture;
         PintarCuadrícula();
-        ChangeTextPosition(canvas.GetWallEPosX(), canvas.GetWallEPosY());
+        ChangeTextPosition(canvas.GetWallEPosY(), canvas.GetWallEPosX());
+        
     }
-
-
     private void PrintConsole(string message)
     {
         textOut.Text = message;
@@ -272,6 +280,11 @@ public partial class Main : Control
     {
         Wall_E_Paint = checkWall_E.ButtonPressed;
         wallETextureRect.Visible = Wall_E_Paint;
+    }
+    private void OnSaveCanvasButtonPressed()
+    {
+        canvasImage.SavePng("res://Generated_Images/Canvas.png");
+        GD.Print("Canvas guardado como 'Canvas.png' en la carpeta 'Img'.");
     }
     private void OnDocumentationButtonPressed()
     {

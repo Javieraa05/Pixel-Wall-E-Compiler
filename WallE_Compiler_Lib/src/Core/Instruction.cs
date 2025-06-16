@@ -15,9 +15,7 @@ namespace Wall_E.Compiler
         // (Puedes extender con otros tipos de instrucción según sea necesario)
     }
 
-    /// <summary>
-    /// Representa una “instrucción gráfica” que Godot deberá animar paso a paso.
-    /// </summary>
+    
     public class Instruction
     {
         public InstructionType Type { get; }

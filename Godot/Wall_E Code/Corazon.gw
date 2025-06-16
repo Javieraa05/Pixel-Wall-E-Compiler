@@ -1,0 +1,15 @@
+Spawn(7,5)
+Color("Red")
+DrawLine(1,-1,1)
+DrawLine(1,0,1)
+DrawLine(1,1,1)
+DrawLine(0,1,1)
+DrawLine(-1,1,3)
+DrawLine(-1,-1,3)
+DrawLine(0,-1,1)
+DrawLine(1,-1,1)
+DrawLine(1,0,1)
+DrawLine(1,1,1)
+Fill()
+
+
