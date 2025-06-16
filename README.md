@@ -231,7 +231,7 @@ loop_end
 ---
 ## Documentación técnica
 
-- [InformeTecnico_WallECompiler.md]
+- (InformeTecnico_WallECompiler.md)
 
 ## 🏷️ Créditos
 
